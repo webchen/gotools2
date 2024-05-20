@@ -1,4 +1,4 @@
-module gotools2
+module github.com/webchen/gotools2
 
 go 1.21.6
 
