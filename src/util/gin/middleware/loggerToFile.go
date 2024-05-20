@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"gotools2/src/util/logs"
+	"github.com/webchen/gotools2/src/util/logs"
 
 	"github.com/gin-gonic/gin"
 )

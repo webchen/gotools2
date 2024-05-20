@@ -3,13 +3,14 @@ package fun
 import (
 	"crypto/tls"
 	"fmt"
-	"gotools2/src/base/conf"
-	"gotools2/src/base/jsontool"
 	"net"
 	"net/http"
 	"time"
 
-	"gotools2/src/util/logs"
+	"github.com/webchen/gotools2/src/base/conf"
+	"github.com/webchen/gotools2/src/base/jsontool"
+
+	"github.com/webchen/gotools2/src/util/logs"
 
 	"github.com/spf13/cast"
 )

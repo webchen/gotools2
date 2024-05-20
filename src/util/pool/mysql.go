@@ -8,9 +8,9 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/spf13/cast"
 
-	"gotools2/src/base"
-	"gotools2/src/base/conf"
-	"gotools2/src/util/logs"
+	"github.com/webchen/gotools2/src/base"
+	"github.com/webchen/gotools2/src/base/conf"
+	"github.com/webchen/gotools2/src/util/logs"
 
 	"xorm.io/xorm"
 	"xorm.io/xorm/names"

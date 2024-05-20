@@ -2,8 +2,6 @@ package base
 
 import (
 	"fmt"
-	"gotools2/src/base/dirtool"
-	"gotools2/src/base/jsontool"
 	"log"
 	"os"
 	"os/exec"
@@ -11,6 +9,9 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/webchen/gotools2/src/base/dirtool"
+	"github.com/webchen/gotools2/src/base/jsontool"
 )
 
 var panicLogger *log.Logger

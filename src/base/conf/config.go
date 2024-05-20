@@ -2,10 +2,11 @@ package conf
 
 import (
 	"fmt"
-	"gotools2/src/base"
-	"gotools2/src/base/dirtool"
-	"gotools2/src/base/jsontool"
 	"time"
+
+	"github.com/webchen/gotools2/src/base"
+	"github.com/webchen/gotools2/src/base/dirtool"
+	"github.com/webchen/gotools2/src/base/jsontool"
 
 	"log"
 	"os"

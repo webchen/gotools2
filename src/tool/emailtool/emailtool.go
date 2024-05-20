@@ -2,9 +2,10 @@ package emailtool
 
 import (
 	"fmt"
-	"gotools2/src/base/conf"
 	"net/smtp"
 	"strings"
+
+	"github.com/webchen/gotools2/src/base/conf"
 )
 
 var username = conf.GetConfig("email.sender", "altidc@qq.com").(string)

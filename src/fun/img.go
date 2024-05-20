@@ -2,7 +2,6 @@ package fun
 
 import (
 	"bytes"
-	"gotools2/src/base/dirtool"
 	"image"
 	"image/jpeg"
 	"io"
@@ -10,6 +9,8 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/webchen/gotools2/src/base/dirtool"
 
 	"github.com/nfnt/resize"
 )

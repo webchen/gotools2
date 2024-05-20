@@ -1,10 +1,11 @@
 package estool
 
 import (
-	"gotools2/src/base/conf"
 	"strings"
 
-	"gotools2/src/util/logs"
+	"github.com/webchen/gotools2/src/base/conf"
+
+	"github.com/webchen/gotools2/src/util/logs"
 
 	"github.com/elastic/go-elasticsearch/v8"
 )

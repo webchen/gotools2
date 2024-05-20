@@ -1,10 +1,11 @@
 package fun
 
 import (
-	"gotools2/src/base/conf"
 	"time"
 
-	"gotools2/src/base/jsontool"
+	"github.com/webchen/gotools2/src/base/conf"
+
+	"github.com/webchen/gotools2/src/base/jsontool"
 
 	"github.com/valyala/fasthttp"
 )

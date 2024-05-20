@@ -2,9 +2,10 @@ package conf
 
 import (
 	"fmt"
-	"gotools2/src/tool/nettool"
 	"log"
 	"math/rand"
+
+	"github.com/webchen/gotools2/src/tool/nettool"
 
 	consulapi "github.com/hashicorp/consul/api"
 	"github.com/spf13/cast"

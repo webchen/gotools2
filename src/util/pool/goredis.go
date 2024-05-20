@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"gotools2/src/base/conf"
+	"github.com/webchen/gotools2/src/base/conf"
 
-	"gotools2/src/base"
+	"github.com/webchen/gotools2/src/base"
 
-	"gotools2/src/util/logs"
+	"github.com/webchen/gotools2/src/util/logs"
 
 	"github.com/spf13/cast"
 

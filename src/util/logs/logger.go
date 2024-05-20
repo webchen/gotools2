@@ -2,9 +2,10 @@ package logs
 
 import (
 	"fmt"
-	"gotools2/src/base"
-	"gotools2/src/base/conf"
 	"strings"
+
+	"github.com/webchen/gotools2/src/base"
+	"github.com/webchen/gotools2/src/base/conf"
 
 	"log"
 	"os"

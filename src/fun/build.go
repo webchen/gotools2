@@ -2,15 +2,16 @@ package fun
 
 import (
 	"fmt"
-	"gotools2/src/base"
-	"gotools2/src/base/dirtool"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 
-	"gotools2/src/base/conf"
+	"github.com/webchen/gotools2/src/base"
+	"github.com/webchen/gotools2/src/base/dirtool"
+
+	"github.com/webchen/gotools2/src/base/conf"
 )
 
 // var buildDir = "build" + string(os.PathSeparator)
