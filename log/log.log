@@ -1,0 +1,41 @@
+[Warning] 2024/05/20 15:38:53 test 
+1 
+[test]
+---------------
+stack: 1 [file: H:/project/gotools2/src/util/logs/logger.go:83] [func: gotools2/src/util/logs.Warning] [line: 83]
+stack: 2 [file: H:/project/gotools2/main.go:7] [func: main.main] [line: 7]
+stack: 3 [file: D:/Go/src/runtime/proc.go:267] [func: runtime.main] [line: 267]
+stack: 4 [file: D:/Go/src/runtime/asm_amd64.s:1650] [func: runtime.goexit] [line: 1650]
+---------------
+[Warning] 2024/05/20 15:43:30 warning info ... 
+map[string]interface {}{"a":1, "b":"2024-05-20 15:43:30"} 
+[warning info ...]
+---------------
+stack: 1 [file: H:/project/gotools2/src/util/logs/logger.go:83] [func: gotools2/src/util/logs.Warning]
+stack: 2 [file: H:/project/gotools2/main.go:10] [func: main.main]
+stack: 3 [file: D:/Go/src/runtime/proc.go:267] [func: runtime.main]
+stack: 4 [file: D:/Go/src/runtime/asm_amd64.s:1650] [func: runtime.goexit]
+---------------
+[Warning] 2024/05/20 15:45:47 warning info ... 
+map[string]interface {}{"a":1, "b":"2024-05-20 15:45:47"} 
+
+[Warning] [2024-05-20 16:11:09.898] warning info ... 
+map[string]interface {}{"a":1, "b":"2024-05-20 16:11:09"}
+[Warning] [2024-05-20 16:12:20.834] warning info ... 
+map[string]interface {}{"a":1, "b":"2024-05-20 16:12:20"} 
+[warning info ...]
+---------------
+stack: 1 [file: H:/project/gotools2/src/util/logs/logger.go:84] [func: gotools2/src/util/logs.Warning]
+stack: 2 [file: H:/project/gotools2/main.go:10] [func: main.main]
+stack: 3 [file: D:/Go/src/runtime/proc.go:267] [func: runtime.main]
+stack: 4 [file: D:/Go/src/runtime/asm_amd64.s:1650] [func: runtime.goexit]
+---------------
+[Warning] [2024-05-20 16:13:20.247] warning info ... 
+map[string]interface {}{"a":1, "b":"2024-05-20 16:13:20"} 
+[warning info ...]
+---------------
+stack: 1 [file: H:/project/gotools2/src/util/logs/logger.go:84] [func: gotools2/src/util/logs.Warning]
+stack: 2 [file: H:/project/gotools2/main.go:10] [func: main.main]
+stack: 3 [file: D:/Go/src/runtime/proc.go:267] [func: runtime.main]
+stack: 4 [file: D:/Go/src/runtime/asm_amd64.s:1650] [func: runtime.goexit]
+---------------
