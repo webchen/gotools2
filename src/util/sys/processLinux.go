@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/webchen/gotools/help/logs"
+	"github.com/webchen/gotools2/src/util/logs"
 )
 
 // ProcessExists  ，判断进程是否在运行
