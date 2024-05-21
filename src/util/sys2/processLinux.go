@@ -1,7 +1,7 @@
 //go:build !windows
 // +build !windows
 
-package sys
+package sys2
 
 import (
 	"os"
@@ -32,12 +32,12 @@ func SignProcess(chSign chan uint8) {
 	for s := range c {
 		switch s {
 		case syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, os.Interrupt, os.Kill:
-			logs.Info("begin to stop ...", nil)
+			logs.Info("begin to stop ...")
 			chSign <- 2
 			break
 		case syscall.SIGUSR2:
 			chSign <- 1
-			logs.Info("begin to stop ...", nil)
+			logs.Info("begin to stop ...")
 			break
 		default:
 			break

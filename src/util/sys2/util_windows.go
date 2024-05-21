@@ -1,4 +1,4 @@
-package sys
+package sys2
 
 import (
 	"os"
