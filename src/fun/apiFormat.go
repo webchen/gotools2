@@ -1,8 +1,11 @@
 package fun
 
 import (
+	"fmt"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 // ApiFormat 对外API格式
@@ -33,4 +36,24 @@ func ApiFormatFail(message string) (m map[string]interface{}) {
 		message = "fail"
 	}
 	return ApiFormat(0, nil, message)
+}
+
+func SendReponse(c *gin.Context, err error, data interface{}, msg string) {
+	code := 1
+	if err != nil {
+		code = 0
+		if msg == "" {
+			msg = err.Error()
+		}
+	}
+	if data == nil {
+		data = make(map[string]interface{}, 0)
+	}
+	m := ApiFormat(uint8(code), data, msg)
+	c.JSON(200, m)
+	c.Abort()
+}
+
+func SendErrorResponse(c *gin.Context, errMsg string) {
+	SendReponse(c, fmt.Errorf(errMsg), nil, "")
 }
