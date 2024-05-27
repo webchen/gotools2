@@ -20,7 +20,7 @@ import (
 // Ctx redis的CTX
 var Ctx = context.Background()
 
-var clientList = make(map[string]*redis.Client)
+var redisClientList = make(map[string]*redis.Client)
 
 func init() {
 	if base.IsBuild() {
@@ -51,17 +51,17 @@ func init() {
 			PoolTimeout:  time.Second * 2,
 			IdleTimeout:  time.Second * 2,
 		})
-		clientList[k] = c
+		redisClientList[k] = c
 	}
 }
 
 // GetClient 获取对象
-func GetClient(key string) *redis.Client {
+func GetRedisClient(key string) *redis.Client {
 	key = strings.TrimSpace(key)
 	if key == "" {
 		return nil
 	}
-	if v, ok := clientList[key]; ok {
+	if v, ok := redisClientList[key]; ok {
 		return v
 	}
 	return nil
