@@ -73,7 +73,7 @@ func checkBaseConfigData() bool {
 }
 
 func loadBaseConfig() {
-	if baseConfigData != nil {
+	if checkBaseConfigData() {
 		return
 	}
 	f := dirtool.GetConfigPath() + "baseConfig.json"
@@ -96,7 +96,7 @@ func initConsul() {
 		}
 		r, _, err := consulClient.KV().Get(prefix+v.(string), nil)
 		if err != nil {
-			log.Println("config ", v, " read from consul error...")
+			log.Println("\n", "config ", v, " read from consul error...")
 			continue
 		}
 		if r == nil {

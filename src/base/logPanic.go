@@ -112,16 +112,10 @@ func LogPanic(message string, data interface{}) {
 	info := &LogObj{}
 	info.Message = message
 	info.Time = time.Now().Format(time.DateTime + ".999")
-	info.Level = "Error"
+	info.Level = "Panic"
 	info.Trace = TraceInfo(message)
-	val, isString := data.(string)
-	if isString && strings.TrimSpace(val) != "" {
-		info.Data = jsontool.JSONStrFormat(val)
-	} else {
-		info.Data = jsontool.JSONStrFormat(jsontool.MarshalToString(data))
-	}
 
-	s := jsontool.MarshalToString(info)
+	s := fmt.Sprintf("[%s] %s \n%#v", info.Time, message, info.Data)
 
 	panicLogger.SetPrefix("")
 	panicLogger.SetFlags(0)
