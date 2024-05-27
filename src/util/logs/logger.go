@@ -162,6 +162,7 @@ func WebAccess(format string, v ...interface{}) {
 	if strings.Contains(data, "kube-probe/") || strings.Contains(data, "SLBHealthCheck") {
 		return
 	}
+	fileLogger.SetFlags(log.Lmicroseconds)
 	fileLogger.SetPrefix("[ACCESS] ")
 	fileLogger.Println(data)
 }
