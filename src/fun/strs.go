@@ -46,9 +46,9 @@ func RandString(length int) string {
 	return string(bytes)
 }
 
-func PasswordHash(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	return string(bytes), err
+func PasswordHash(password string) string {
+	bytes, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(bytes)
 }
 
 func PasswordVerify(password, hash string) bool {
