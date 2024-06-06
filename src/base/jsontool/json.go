@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"os"
+	"strings"
 	//jsoniter "github.com/json-iterator/go"
 )
 
@@ -24,7 +25,11 @@ func LoadFromByte(bytes []byte, v interface{}) {
 
 // LoadFromString 从string转json对象
 func LoadFromString(str string, v interface{}) {
+	d := json.NewDecoder(strings.NewReader(str))
+	d.UseNumber()
+	d.Decode(&v)
 	json.Unmarshal([]byte(str), &v)
+	//json.Unmarshal([]byte(str), &v)
 }
 
 // MarshalToString interface to string
