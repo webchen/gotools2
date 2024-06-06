@@ -28,7 +28,6 @@ func LoadFromString(str string, v interface{}) {
 	d := json.NewDecoder(strings.NewReader(str))
 	d.UseNumber()
 	d.Decode(&v)
-	json.Unmarshal([]byte(str), &v)
 	//json.Unmarshal([]byte(str), &v)
 }
 
