@@ -13,19 +13,7 @@ import (
 
 var consulClient *consulapi.Client
 
-func init() {
-	loadBaseConfig()
-	initConsulClient()
-}
-
 func checkConsul() bool {
-	/*
-		if consulClient == nil {
-			log.Println("初始化consul失败，不更新配置和注册")
-			return false
-		}
-		return true
-	*/
 	return consulClient != nil
 }
 

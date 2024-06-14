@@ -122,7 +122,7 @@ func LogPanic(message string, data interface{}) {
 	panicLogger.Println(s)
 
 	log.SetPrefix("[panic]")
-	log.SetFlags(log.Lmicroseconds)
+	log.SetFlags(log.Ldate | log.Lmicroseconds)
 	log.Println(s)
 
 }

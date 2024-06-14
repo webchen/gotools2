@@ -2,6 +2,7 @@ package pool
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -22,15 +23,15 @@ var Ctx = context.Background()
 
 var redisClientList = make(map[string]*redis.Client)
 
-func init() {
+func InitRedis() error {
 	if base.IsBuild() {
-		return
+		return nil
 	}
 	var redisList map[string]interface{}
 	redisList = conf.GetConfig("redis", redisList).(map[string]interface{})
 	if len(redisList) == 0 {
 		logs.Warning("redis config is nil", nil, false)
-		return
+		return fmt.Errorf("redis 配置为空")
 	}
 
 	for k, v := range redisList {
@@ -51,8 +52,15 @@ func init() {
 			PoolTimeout:  time.Second * 2,
 			IdleTimeout:  time.Second * 2,
 		})
+		_, err := c.Ping(Ctx).Result()
+		if err != nil {
+			logs.Warning("redis 连接失败", err, false)
+			return err
+		}
 		redisClientList[k] = c
 	}
+
+	return nil
 }
 
 // GetClient 获取对象
@@ -64,5 +72,6 @@ func GetRedisClient(key string) *redis.Client {
 	if v, ok := redisClientList[key]; ok {
 		return v
 	}
+	logs.Warning("redis client ["+key+"] 不存在", nil, false)
 	return nil
 }

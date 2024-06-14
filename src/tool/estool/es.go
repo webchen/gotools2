@@ -12,7 +12,7 @@ import (
 
 var esList = make(map[string]*elasticsearch.Client)
 
-func init() {
+func InitES() error {
 	var es *elasticsearch.Client
 	serverList := make(map[string]interface{})
 	serverList = conf.GetConfig("es", serverList).(map[string]interface{})
@@ -34,11 +34,11 @@ func init() {
 		var err error
 		es, err = elasticsearch.NewClient(cfg)
 		if logs.ErrorProcess(err, "无法初始化ES") {
-			continue
+			return err
 		}
 		esList[k] = es
 	}
-
+	return nil
 }
 
 // GetESClient 获取ES客户端

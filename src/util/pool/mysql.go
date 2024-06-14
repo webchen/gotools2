@@ -20,9 +20,9 @@ var mysqlList = make(map[string]*xorm.Engine)
 
 //var dbLog *log.Logger
 
-func init() {
+func InitMysql() error {
 	if base.IsBuild() {
-		return
+		return nil
 	}
 	//dbLog = base.CreateLogFileAccess("db.log")
 
@@ -34,23 +34,23 @@ func init() {
 
 		db, err := xorm.NewEngine("mysql", dsn)
 		if logs.ErrorProcess(err, "connect to mysql fail 1") {
-			continue
+			return err
 		}
 
 		err = db.Ping()
 		if logs.ErrorProcess(err, "connect to mysql fail 2") {
-			continue
+			return err
 		}
 		db.SetMapper(names.SnakeMapper{})
-		db.ShowSQL(true)
+		//db.ShowSQL(true)
 		db.SetMaxOpenConns(cast.ToInt(vv["maxOpen"]))
 		db.SetMaxIdleConns(cast.ToInt(vv["maxIdle"]))
 		db.TZLocation, _ = time.LoadLocation("Asia/Shanghai")
-		db.ShowSQL(false)
+		//db.ShowSQL(false)
 		//db.SetLogger(dbLog)
 		mysqlList[k] = db
 	}
-
+	return nil
 }
 
 // GetMysqlClient 获取对象
