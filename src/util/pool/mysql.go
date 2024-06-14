@@ -60,6 +60,7 @@ func GetMysqlClient(key string) *xorm.Engine {
 		return nil
 	}
 	if v, ok := mysqlList[key]; ok {
+		logs.Warning("mysql client ["+key+"] 不存在", nil, false)
 		return v
 	}
 	return nil

@@ -25,18 +25,14 @@ var baseConfigData map[string]map[string]interface{}
 
 var loadTime time.Time = time.Now()
 
-// var configLock sync.RWMutex
+//var configLock sync.RWMutex
 
 func init() {
+	toInit()
+}
+
+func toInit() {
 	loadBaseConfig()
-	//toLoad()
-}
-
-func ConfigLoad() {
-	toLoad()
-}
-
-func toLoad() {
 	if !base.IsBuild() {
 		if checkBaseConfigData() {
 			if baseConfigData["configType"]["name"] == nil {
@@ -83,7 +79,7 @@ func loadBaseConfig() {
 	f := dirtool.GetConfigPath() + "baseConfig.json"
 	exists, _ := dirtool.PathExist(f)
 	if !exists {
-		fmt.Println("loadBaseConfig error, " + f + " not exists")
+		fmt.Println("loadBaseConfig error, baseConfig.json not exists")
 		return
 	}
 	jsontool.LoadFromFile(f, &baseConfigData)

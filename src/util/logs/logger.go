@@ -24,7 +24,7 @@ var cmdLogger *log.Logger
 var cmdLevel int = 0
 var fileLevel int = 0
 
-func InitLogger() {
+func init() {
 	cmdLevel = cast.ToInt(conf.GetConfig("conf.logCmdLevel", 0.0))
 	fileLevel = cast.ToInt(conf.GetConfig("conf.logFileLevel", 0.0))
 	fileLogger = access("log")
