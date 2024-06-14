@@ -2,6 +2,7 @@ package fun
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
@@ -107,7 +108,10 @@ func HTTPBaseGet(url string) interface{} {
 		return nil
 	}
 
-	code := cast.ToInt(data["code"])
+	code, err := data["code"].(json.Number).Int64()
+	if err != nil {
+		code = cast.ToInt64(data["code"])
+	}
 
 	if code != 1 {
 		logs.Warning(fmt.Sprintf("http [%s] 请求返回data [%+v] 不正确", url, data), "", false)
