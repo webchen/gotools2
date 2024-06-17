@@ -9,10 +9,11 @@ require (
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/hashicorp/consul/api v1.28.3
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
-	github.com/spf13/cast v1.3.0
+	github.com/spf13/cast v1.6.0
 	github.com/toolkits/net v0.0.0-20160910085801-3f39ab6fe3ce
 	github.com/valyala/fasthttp v1.26.0
 	github.com/zouyx/agollo/v4 v4.0.8
+	golang.org/x/crypto v0.23.0
 	xorm.io/xorm v1.3.9
 )
 
@@ -70,7 +71,6 @@ require (
 	go.opentelemetry.io/otel/metric v0.20.0 // indirect
 	go.opentelemetry.io/otel/trace v0.20.0 // indirect
 	golang.org/x/arch v0.8.0 // indirect
-	golang.org/x/crypto v0.23.0 // indirect
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect

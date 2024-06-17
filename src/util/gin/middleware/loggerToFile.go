@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"bytes"
 	"io"
 	"net/http"
 	"time"
@@ -10,10 +11,36 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type bodyLogWriter struct {
+	gin.ResponseWriter
+	body *bytes.Buffer
+}
+
+// Write 读取响应数据
+func (w bodyLogWriter) Write(b []byte) (int, error) {
+	w.body.Write(b)
+	return w.ResponseWriter.Write(b)
+}
+
 func LoggerToFile() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 开始时间
 		startTime := time.Now()
+
+		// post 数据
+		b := make([]byte, 0)
+
+		if c.Request.Method == http.MethodPost || c.Request.Method == http.MethodPut {
+			b, _ = io.ReadAll(c.Request.Body)
+			c.Request.Body = io.NopCloser(bytes.NewBuffer(b))
+		}
+
+		// 初始化bodyLogWriter
+		blw := &bodyLogWriter{
+			body:           bytes.NewBufferString(""),
+			ResponseWriter: c.Writer,
+		}
+		c.Writer = blw
 
 		// 处理请求
 		c.Next()
@@ -29,21 +56,18 @@ func LoggerToFile() gin.HandlerFunc {
 		// 状态码
 		statusCode := c.Writer.Status()
 		// 请求IP
-		clientIP := c.Request.Host
-		// post 数据
-		b := make([]byte, 0)
+		clientIP := c.ClientIP()
 
-		if c.Request.Method == http.MethodPost || c.Request.Method == http.MethodPut {
-			b, _ = io.ReadAll(c.Request.Body)
-		}
+		responseBody := blw.body.String()
 
-		logs.WebAccess("| %3d | %13v | %15s | %s | %s | %s",
+		logs.WebAccess("| %3d | %13v | %15s | %s | %s | %s | %s ",
 			statusCode,
 			latencyTime,
 			clientIP,
 			reqMethod,
 			reqUri,
 			string(b),
+			responseBody,
 		)
 	}
 }
