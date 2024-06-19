@@ -33,7 +33,7 @@ func InitES() error {
 		}
 		var err error
 		es, err = elasticsearch.NewClient(cfg)
-		if logs.ErrorProcess(err, "无法初始化ES") {
+		if logs.ErrorProcess(err, "无法初始化ES", nil) {
 			return err
 		}
 		esList[k] = es

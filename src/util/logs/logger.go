@@ -127,10 +127,10 @@ func Error(message string, data interface{}) {
 }
 
 // ErrorProcess 错误处理
-func ErrorProcess(err error, msg string) bool {
+func ErrorProcess(err error, msg string, data interface{}) bool {
 	if err != nil {
-		msg += "\n"
-		Error(msg, err)
+		msg += "\n" + err.Error()
+		Error(msg, data)
 		return true
 	}
 	return false

@@ -33,12 +33,12 @@ func InitMysql() error {
 		dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=True", vv["user"], vv["password"], vv["host"], vv["port"], vv["db"], vv["charset"])
 
 		db, err := xorm.NewEngine("mysql", dsn)
-		if logs.ErrorProcess(err, "connect to mysql fail 1") {
+		if logs.ErrorProcess(err, "connect to mysql fail 1", dsn) {
 			return err
 		}
 
 		err = db.Ping()
-		if logs.ErrorProcess(err, "connect to mysql fail 2") {
+		if logs.ErrorProcess(err, "connect to mysql fail 2", dsn) {
 			return err
 		}
 		db.SetMapper(names.SnakeMapper{})
