@@ -153,6 +153,65 @@ func HTTPServicePostJSON(url string, jsonMap map[string]interface{}) string {
 	return HTTPPostJSON(url, jsonMap)
 }
 
-func HTTPPostForm(url string, data map[string]interface{}) string {
-	return doHTTP("POST", url, 0, data)
+func HTTPServicePostJSONSuccess(url string, jsonMap map[string]interface{}) map[string]interface{} {
+	r := HTTPPostJSON(url, jsonMap)
+	return getSuccessData(r)
+}
+
+func getSuccessData(s string) map[string]interface{} {
+	data := make(map[string]interface{})
+	jsontool.LoadFromString(s, &data)
+	if len(data) == 0 {
+		return data
+	}
+
+	code := cast.ToInt(data["code"])
+	if code != 1 {
+		return data
+	}
+
+	d, ok := data["data"].(map[string]interface{})
+	if ok {
+		return d
+	}
+	return data
+}
+
+func getSuccessDataList(s string) []interface{} {
+	data := make(map[string]interface{})
+	rr := make([]interface{}, 0)
+	jsontool.LoadFromString(s, &data)
+	if len(data) == 0 {
+		return rr
+	}
+
+	code := cast.ToInt(data["code"])
+	if code != 1 {
+		return rr
+	}
+
+	d, ok := data["data"].([]interface{})
+	if ok {
+		return d
+	}
+	return rr
+}
+
+func HTTPPostForm(url string, jsonMap map[string]interface{}) string {
+	return doHTTP("POST", url, 0, jsonMap)
+}
+
+func HTTPServicePostFormSuccess(url string, jsonMap map[string]interface{}) map[string]interface{} {
+	r := HTTPPostForm(url, jsonMap)
+	return getSuccessData(r)
+}
+
+func HTTPServicePostFormListSuccess(url string, jsonMap map[string]interface{}) []interface{} {
+	r := HTTPPostForm(url, jsonMap)
+	return getSuccessDataList(r)
+}
+
+func HTTPServicePostJsonListSuccess(url string, jsonMap map[string]interface{}) []interface{} {
+	r := HTTPPostJSON(url, jsonMap)
+	return getSuccessDataList(r)
 }
