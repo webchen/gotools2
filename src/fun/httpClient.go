@@ -36,7 +36,7 @@ var times int = 2
 func HTTPGet(url string) string {
 	strs := ""
 	for j := 1; j <= times; j++ {
-		strs = doHTTP("GET", url, nil)
+		strs = doHTTP("GET", url, 0, nil)
 		if strs != "" {
 			break
 		}
@@ -45,8 +45,9 @@ func HTTPGet(url string) string {
 	return strs
 }
 
-func doHTTP(method string, url string, jsonMap map[string]interface{}) string {
-	return doHTTP2(method, url, jsonMap)
+// postType，2: json 1: form-data （暂时当0处理） 0：x-www-form-urlencoded
+func doHTTP(method string, url string, postType int, jsonMap map[string]interface{}) string {
+	return doHTTP2(method, url, postType, jsonMap)
 	/*
 		strs := ""
 		var err error
@@ -139,7 +140,7 @@ func HTTPServiceGetSuccess(url string) map[string]interface{} {
 func HTTPPostJSON(url string, jsonMap map[string]interface{}) string {
 	strs := ""
 	for j := 1; j <= times; j++ {
-		strs = doHTTP("POST", url, jsonMap)
+		strs = doHTTP("POST", url, 2, jsonMap)
 		if strs != "" {
 			break
 		}
@@ -150,4 +151,8 @@ func HTTPPostJSON(url string, jsonMap map[string]interface{}) string {
 // HTTPServicePostJSON 发送远程POST请求
 func HTTPServicePostJSON(url string, jsonMap map[string]interface{}) string {
 	return HTTPPostJSON(url, jsonMap)
+}
+
+func HTTPPostForm(url string, data map[string]interface{}) string {
+	return doHTTP("POST", url, 0, data)
 }
