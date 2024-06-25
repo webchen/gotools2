@@ -154,8 +154,9 @@ func HTTPPostJSON(url string, jsonMap map[string]interface{}) string {
 }
 
 // HTTPServicePostJSON 发送远程POST请求
-func HTTPServicePostJSON(url string, jsonMap map[string]interface{}) string {
-	return HTTPPostJSON(url, jsonMap)
+func HTTPServicePostJSON(url string, jsonMap map[string]interface{}) map[string]interface{} {
+	r := HTTPPostJSON(url, jsonMap)
+	return getData(r)
 }
 
 func HTTPServicePostJSONSuccess(url string, jsonMap map[string]interface{}) map[string]interface{} {
@@ -163,23 +164,25 @@ func HTTPServicePostJSONSuccess(url string, jsonMap map[string]interface{}) map[
 	return getSuccessData(r)
 }
 
-func getSuccessData(s string) map[string]interface{} {
+func getData(s string) map[string]interface{} {
 	data := make(map[string]interface{})
 	jsontool.LoadFromString(s, &data)
-	if len(data) == 0 {
-		return data
-	}
+	return data
+}
+
+func getSuccessData(s string) map[string]interface{} {
+	data := getData(s)
 
 	code := cast.ToInt(data["code"])
 	if code != 1 {
-		return data
+		return make(map[string]interface{})
 	}
 
 	d, ok := data["data"].(map[string]interface{})
 	if ok {
 		return d
 	}
-	return data
+	return make(map[string]interface{})
 }
 
 func getSuccessDataList(s string) []interface{} {
@@ -204,6 +207,11 @@ func getSuccessDataList(s string) []interface{} {
 
 func HTTPPostForm(url string, jsonMap map[string]interface{}) string {
 	return doHTTP("POST", url, 0, jsonMap)
+}
+
+func HTTPServicePostForm(url string, jsonMap map[string]interface{}) map[string]interface{} {
+	r := HTTPPostForm(url, jsonMap)
+	return getData(r)
 }
 
 func HTTPServicePostFormSuccess(url string, jsonMap map[string]interface{}) map[string]interface{} {
