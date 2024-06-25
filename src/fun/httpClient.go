@@ -47,7 +47,16 @@ func HTTPGet(url string) string {
 
 // postType，2: json 1: form-data （暂时当0处理） 0：x-www-form-urlencoded
 func doHTTP(method string, url string, postType int, jsonMap map[string]interface{}) string {
-	return doHTTP2(method, url, postType, jsonMap)
+	debugBaseGet := cast.ToInt(conf.GetConfig("system.http.debugBaseGet", 0))
+	rd := GetReqSeqId()
+	if debugBaseGet == 1 {
+		logs.Info("doHTTP query [%s] : %s url: %s , data: %#v", rd, method, url, jsonMap)
+	}
+	s := doHTTP2(method, url, postType, jsonMap)
+	if debugBaseGet == 1 {
+		logs.Info("doHTTP response [%s] : %s ", rd, s)
+	}
+	return s
 	/*
 		strs := ""
 		var err error
@@ -92,10 +101,6 @@ func HTTPBaseGet(url string) interface{} {
 	data := make(map[string]interface{})
 	strData := HTTPGet(url)
 
-	debugBaseGet := cast.ToInt(conf.GetConfig("system.http.debugBaseGet", 0))
-	if debugBaseGet == 1 {
-		logs.Info("HTTPBaseGet : %s   result : %s", url, strData)
-	}
 	if len(strData) == 0 {
 		logs.Warning(fmt.Sprintf("http请求 [%s] 返回空", url), "", false)
 		return data
