@@ -40,7 +40,7 @@ func HTTPGet(url string) string {
 		if strs != "" {
 			break
 		}
-		time.Sleep(time.Millisecond * 20)
+		time.Sleep(time.Millisecond * 100)
 	}
 	return strs
 }
@@ -87,53 +87,16 @@ func doHTTP(method string, url string, postType int, jsonMap map[string]interfac
 	*/
 }
 
-// HTTPGetSuccess 获取返回正确的请求的值
+// HTTPGetSuccess 获取返回正确的请求的值(data字段的值)，忽略错误
 func HTTPGetSuccess(url string) map[string]interface{} {
-	data := HTTPBaseGet(url)
-	if it, ok := (data).(map[string]interface{}); ok {
-		return it
-	}
-	return make(map[string]interface{})
+	data := HTTPGet(url)
+	return getSuccessData(data)
 }
 
-// HTTPBaseGet 获取数据，返回interface，可逐个类型判断
-func HTTPBaseGet(url string) interface{} {
-	data := make(map[string]interface{})
-	strData := HTTPGet(url)
-
-	if len(strData) == 0 {
-		logs.Warning(fmt.Sprintf("http请求 [%s] 返回空", url), "", false)
-		return data
-	}
-
-	jsontool.LoadFromString(strData, &data)
-
-	if _, ok := data["code"]; !ok {
-		logs.Warning(fmt.Sprintf("http请求 [%s] 返回data [%s] 不正确", url, data), "", false)
-		return nil
-	}
-
-	code := cast.ToInt(data["code"])
-
-	if code != 1 {
-		logs.Warning(fmt.Sprintf("http [%s] 请求返回data [%+v] 不正确", url, data), "", false)
-		return nil
-	}
-
-	if val, ok := data["data"].(interface{}); ok {
-		return val
-	}
-	logs.Warning(fmt.Sprintf("http [%s] 请求 data返回 nil", url), "", false)
-	return nil
-}
-
-// HTTPGetListSuccess 获取数据列表
+// HTTPGetListSuccess 获取数据列表，忽略错误
 func HTTPGetListSuccess(url string) []interface{} {
-	data := HTTPBaseGet(url)
-	if d, ok := (data).([]interface{}); ok {
-		return d
-	}
-	return nil
+	data := HTTPGet(url)
+	return getSuccessDataList(data)
 }
 
 // HTTPServiceGetSuccess 获取GET数据
@@ -141,6 +104,7 @@ func HTTPServiceGetSuccess(url string) map[string]interface{} {
 	return HTTPGetSuccess(url)
 }
 
+// ------------  post json 相关方法 start -----------
 // HTTPPostJSON 发数POST请求
 func HTTPPostJSON(url string, jsonMap map[string]interface{}) string {
 	strs := ""
@@ -154,9 +118,9 @@ func HTTPPostJSON(url string, jsonMap map[string]interface{}) string {
 }
 
 // HTTPServicePostJSON 发送远程POST请求
-func HTTPServicePostJSON(url string, jsonMap map[string]interface{}) map[string]interface{} {
+func HTTPServicePostJSON(url string, jsonMap map[string]interface{}) (map[string]interface{}, error) {
 	r := HTTPPostJSON(url, jsonMap)
-	return getData(r)
+	return getBaseData(r)
 }
 
 func HTTPServicePostJSONSuccess(url string, jsonMap map[string]interface{}) map[string]interface{} {
@@ -164,54 +128,104 @@ func HTTPServicePostJSONSuccess(url string, jsonMap map[string]interface{}) map[
 	return getSuccessData(r)
 }
 
+func HTTPServicePostJsonList(url string, jsonMap map[string]interface{}) ([]interface{}, error) {
+	r := HTTPPostJSON(url, jsonMap)
+	return getBaseList(r)
+}
+
+func HTTPServicePostJsonListSuccess(url string, jsonMap map[string]interface{}) []interface{} {
+	r := HTTPPostJSON(url, jsonMap)
+	return getSuccessDataList(r)
+}
+
+// ------------  post json 相关方法 end  -----------
+
 func getData(s string) map[string]interface{} {
 	data := make(map[string]interface{})
 	jsontool.LoadFromString(s, &data)
 	return data
 }
 
-func getSuccessData(s string) map[string]interface{} {
+func getBaseData(s string) (map[string]interface{}, error) {
 	data := getData(s)
-
 	code := cast.ToInt(data["code"])
+	msg := cast.ToString(data["message"])
 	if code != 1 {
-		return make(map[string]interface{})
+		if msg == "" {
+			msg = "接口返回状态错误"
+		}
+		return nil, fmt.Errorf(msg)
 	}
-
 	d, ok := data["data"].(map[string]interface{})
 	if ok {
-		return d
+		return d, nil
 	}
-	return make(map[string]interface{})
+	return nil, fmt.Errorf(msg)
 }
 
-func getSuccessDataList(s string) []interface{} {
+func getSuccessData(s string) map[string]interface{} {
+	data, err := getBaseData(s)
+	if err != nil {
+		return nil
+	}
+	return data
+}
+
+// 获取处理好的信息（data字段是第一个返回值。有错误返回nil。）
+func GetFixedData(urls string) (map[string]interface{}, error) {
+	s := HTTPGet(urls)
+	return getBaseData(s)
+}
+
+func getBaseList(s string) ([]interface{}, error) {
 	data := make(map[string]interface{})
-	rr := make([]interface{}, 0)
 	jsontool.LoadFromString(s, &data)
 	if len(data) == 0 {
-		return rr
+		return nil, nil
 	}
 
 	code := cast.ToInt(data["code"])
+	msg := cast.ToString(data["message"])
 	if code != 1 {
-		return rr
+		if msg == "" {
+			msg = "接口返回状态错误"
+		}
+		return nil, fmt.Errorf(msg)
 	}
 
 	d, ok := data["data"].([]interface{})
 	if ok {
-		return d
+		return d, nil
 	}
-	return rr
+	return nil, fmt.Errorf(msg)
 }
 
+func getSuccessDataList(s string) []interface{} {
+	data, err := getBaseList(s)
+	if err != nil {
+		return nil
+	}
+	return data
+}
+
+func GetFixedList(urls string) ([]interface{}, error) {
+	s := HTTPGet(urls)
+	return getBaseList(s)
+}
+
+// --------- POST FROM start ----------
 func HTTPPostForm(url string, jsonMap map[string]interface{}) string {
 	return doHTTP("POST", url, 0, jsonMap)
 }
 
-func HTTPServicePostForm(url string, jsonMap map[string]interface{}) map[string]interface{} {
+func HTTPServicePostForm(url string, jsonMap map[string]interface{}) (map[string]interface{}, error) {
 	r := HTTPPostForm(url, jsonMap)
-	return getData(r)
+	return getBaseData(r)
+}
+
+func HTTPServicePostFormList(url string, jsonMap map[string]interface{}) ([]interface{}, error) {
+	r := HTTPPostForm(url, jsonMap)
+	return getBaseList(r)
 }
 
 func HTTPServicePostFormSuccess(url string, jsonMap map[string]interface{}) map[string]interface{} {
@@ -224,7 +238,4 @@ func HTTPServicePostFormListSuccess(url string, jsonMap map[string]interface{}) 
 	return getSuccessDataList(r)
 }
 
-func HTTPServicePostJsonListSuccess(url string, jsonMap map[string]interface{}) []interface{} {
-	r := HTTPPostJSON(url, jsonMap)
-	return getSuccessDataList(r)
-}
+// --------- POST FROM end ----------

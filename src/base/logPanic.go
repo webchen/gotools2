@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/spf13/cast"
 	"github.com/webchen/gotools2/src/base/dirtool"
 	"github.com/webchen/gotools2/src/base/jsontool"
 )
@@ -80,7 +81,7 @@ echo '' > %s
 
 // LogDir 日志文件夹
 func LogDir() string {
-	var dirPath = ""
+	//var dirPath = ""
 	/*
 		if IsWIN() {
 			dirPath, _ = os.Getwd()
@@ -92,13 +93,15 @@ func LogDir() string {
 	cfg := make(map[string]interface{})
 	jsontool.LoadFromFile(dirtool.GetBasePath()+"config"+string(os.PathSeparator)+"system.json", &cfg)
 
-	if cfg != nil && cfg["logdir"] != nil {
-		data, ok := cfg["logdir"].(string)
-		if ok {
-			dirPath = data
+	dirPath := cast.ToString(cfg["logdir"])
+	/*
+		if cfg != nil && cfg["logdir"] != nil {
+			data, ok := cfg["logdir"].(string)
+			if ok {
+				dirPath = data
+			}
 		}
-	}
-
+	*/
 	if dirPath == "" {
 		dirPath, _ = os.Getwd()
 		dirPath += string(os.PathSeparator) + "log" + string(os.PathSeparator)
