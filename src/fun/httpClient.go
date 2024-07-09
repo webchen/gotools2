@@ -32,8 +32,8 @@ var httpClient = http.Client{Timeout: 1 * time.Second, Transport: transport}
 // 重试次数
 var times int = 2
 
-// HTTPGet GET请求
-func HTTPGet(url string) string {
+// HttpGet GET请求
+func HttpGet(url string) string {
 	strs := ""
 	for j := 1; j <= times; j++ {
 		strs = doHTTP("GET", url, 0, nil)
@@ -87,26 +87,26 @@ func doHTTP(method string, url string, postType int, jsonMap map[string]interfac
 	*/
 }
 
-// HTTPGetSuccess 获取返回正确的请求的值(data字段的值)，忽略错误
-func HTTPGetSuccess(url string) map[string]interface{} {
-	data := HTTPGet(url)
+// HttpGetSuccess 获取返回正确的请求的值(data字段的值)，忽略错误
+func HttpGetSuccess(url string) map[string]interface{} {
+	data := HttpGet(url)
 	return getSuccessData(data)
 }
 
-// HTTPGetListSuccess 获取数据列表，忽略错误
-func HTTPGetListSuccess(url string) []interface{} {
-	data := HTTPGet(url)
+// HttpGetListSuccess 获取数据列表，忽略错误
+func HttpGetListSuccess(url string) []interface{} {
+	data := HttpGet(url)
 	return getSuccessDataList(data)
 }
 
-// HTTPServiceGetSuccess 获取GET数据
-func HTTPServiceGetSuccess(url string) map[string]interface{} {
-	return HTTPGetSuccess(url)
+// HttpServiceGetSuccess 获取GET数据
+func HttpServiceGetSuccess(url string) map[string]interface{} {
+	return HttpGetSuccess(url)
 }
 
 // ------------  post json 相关方法 start -----------
-// HTTPPostJSON 发数POST请求
-func HTTPPostJSON(url string, jsonMap map[string]interface{}) string {
+// HttpPostJSON 发数POST请求
+func HttpPostJSON(url string, jsonMap map[string]interface{}) string {
 	strs := ""
 	for j := 1; j <= times; j++ {
 		strs = doHTTP("POST", url, 2, jsonMap)
@@ -117,24 +117,24 @@ func HTTPPostJSON(url string, jsonMap map[string]interface{}) string {
 	return strs
 }
 
-// HTTPServicePostJSON 发送远程POST请求
-func HTTPServicePostJSON(url string, jsonMap map[string]interface{}) (map[string]interface{}, error) {
-	r := HTTPPostJSON(url, jsonMap)
+// HttpServicePostJSON 发送远程POST请求
+func HttpServicePostJSON(url string, jsonMap map[string]interface{}) (map[string]interface{}, error) {
+	r := HttpPostJSON(url, jsonMap)
 	return getBaseData(r)
 }
 
-func HTTPServicePostJSONSuccess(url string, jsonMap map[string]interface{}) map[string]interface{} {
-	r := HTTPPostJSON(url, jsonMap)
+func HttpServicePostJSONSuccess(url string, jsonMap map[string]interface{}) map[string]interface{} {
+	r := HttpPostJSON(url, jsonMap)
 	return getSuccessData(r)
 }
 
-func HTTPServicePostJsonList(url string, jsonMap map[string]interface{}) ([]interface{}, error) {
-	r := HTTPPostJSON(url, jsonMap)
+func HttpServicePostJsonList(url string, jsonMap map[string]interface{}) ([]interface{}, error) {
+	r := HttpPostJSON(url, jsonMap)
 	return getBaseList(r)
 }
 
-func HTTPServicePostJsonListSuccess(url string, jsonMap map[string]interface{}) []interface{} {
-	r := HTTPPostJSON(url, jsonMap)
+func HttpServicePostJsonListSuccess(url string, jsonMap map[string]interface{}) []interface{} {
+	r := HttpPostJSON(url, jsonMap)
 	return getSuccessDataList(r)
 }
 
@@ -172,8 +172,8 @@ func getSuccessData(s string) map[string]interface{} {
 }
 
 // 获取处理好的信息（data字段是第一个返回值。有错误返回nil。）
-func GetFixedData(urls string) (map[string]interface{}, error) {
-	s := HTTPGet(urls)
+func HttpGetData(urls string) (map[string]interface{}, error) {
+	s := HttpGet(urls)
 	return getBaseData(s)
 }
 
@@ -208,33 +208,33 @@ func getSuccessDataList(s string) []interface{} {
 	return data
 }
 
-func GetFixedList(urls string) ([]interface{}, error) {
-	s := HTTPGet(urls)
+func HttpGetList(urls string) ([]interface{}, error) {
+	s := HttpGet(urls)
 	return getBaseList(s)
 }
 
 // --------- POST FROM start ----------
-func HTTPPostForm(url string, jsonMap map[string]interface{}) string {
+func HttpPostForm(url string, jsonMap map[string]interface{}) string {
 	return doHTTP("POST", url, 0, jsonMap)
 }
 
-func HTTPServicePostForm(url string, jsonMap map[string]interface{}) (map[string]interface{}, error) {
-	r := HTTPPostForm(url, jsonMap)
+func HttpServicePostForm(url string, jsonMap map[string]interface{}) (map[string]interface{}, error) {
+	r := HttpPostForm(url, jsonMap)
 	return getBaseData(r)
 }
 
-func HTTPServicePostFormList(url string, jsonMap map[string]interface{}) ([]interface{}, error) {
-	r := HTTPPostForm(url, jsonMap)
+func HttpServicePostFormList(url string, jsonMap map[string]interface{}) ([]interface{}, error) {
+	r := HttpPostForm(url, jsonMap)
 	return getBaseList(r)
 }
 
-func HTTPServicePostFormSuccess(url string, jsonMap map[string]interface{}) map[string]interface{} {
-	r := HTTPPostForm(url, jsonMap)
+func HttpServicePostFormSuccess(url string, jsonMap map[string]interface{}) map[string]interface{} {
+	r := HttpPostForm(url, jsonMap)
 	return getSuccessData(r)
 }
 
-func HTTPServicePostFormListSuccess(url string, jsonMap map[string]interface{}) []interface{} {
-	r := HTTPPostForm(url, jsonMap)
+func HttpServicePostFormListSuccess(url string, jsonMap map[string]interface{}) []interface{} {
+	r := HttpPostForm(url, jsonMap)
 	return getSuccessDataList(r)
 }
 
