@@ -16,7 +16,7 @@ import (
 )
 
 func SaveFileToLocal(url, save_path string) string {
-	ss := HTTPGet(url)
+	ss := HttpGet(url)
 	d := dirtool.GetCWDPath() + "tmp" + string(os.PathSeparator) + save_path
 	dirtool.MustCreateDir(d)
 	p := d + "/" + filepath.Base(url)
