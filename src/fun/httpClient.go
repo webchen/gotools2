@@ -36,7 +36,7 @@ var times int = 2
 func HttpGet(url string) string {
 	strs := ""
 	for j := 1; j <= times; j++ {
-		strs = doHTTP("GET", url, 0, nil)
+		strs = doHttp("GET", url, 0, nil)
 		if strs != "" {
 			break
 		}
@@ -46,15 +46,15 @@ func HttpGet(url string) string {
 }
 
 // postType，2: json 1: form-data （暂时当0处理） 0：x-www-form-urlencoded
-func doHTTP(method string, url string, postType int, jsonMap map[string]interface{}) string {
+func doHttp(method string, url string, postType int, jsonMap map[string]interface{}) string {
 	debugBaseGet := cast.ToInt(conf.GetConfig("system.http.debugBaseGet", 0))
 	rd := GetReqSeqId()
 	if debugBaseGet == 1 {
-		logs.Info("doHTTP query [%s] : %s url: %s , data: %#v", rd, method, url, jsonMap)
+		logs.Info("doHttp query [%s] : %s url: %s , data: %#v", rd, method, url, jsonMap)
 	}
 	s := doHTTP2(method, url, postType, jsonMap)
 	if debugBaseGet == 1 {
-		logs.Info("doHTTP response [%s] : %s ", rd, s)
+		logs.Info("doHttp response [%s] : %s ", rd, s)
 	}
 	return s
 	/*
@@ -109,7 +109,7 @@ func HttpServiceGetSuccess(url string) map[string]interface{} {
 func HttpPostJSON(url string, jsonMap map[string]interface{}) string {
 	strs := ""
 	for j := 1; j <= times; j++ {
-		strs = doHTTP("POST", url, 2, jsonMap)
+		strs = doHttp("POST", url, 2, jsonMap)
 		if strs != "" {
 			break
 		}
@@ -215,7 +215,7 @@ func HttpGetList(urls string) ([]interface{}, error) {
 
 // --------- POST FROM start ----------
 func HttpPostForm(url string, jsonMap map[string]interface{}) string {
-	return doHTTP("POST", url, 0, jsonMap)
+	return doHttp("POST", url, 0, jsonMap)
 }
 
 func HttpServicePostForm(url string, jsonMap map[string]interface{}) (map[string]interface{}, error) {

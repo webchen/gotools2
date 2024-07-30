@@ -9,7 +9,7 @@ import (
 )
 
 // ApiFormat 对外API格式
-func ApiFormat(code uint8, data interface{}, message string) (m map[string]interface{}) {
+func ApiFormat(code int, data interface{}, message string) (m map[string]interface{}) {
 	m = make(map[string]interface{})
 	m["code"] = code
 	if strings.TrimSpace(message) == "" {
@@ -49,7 +49,7 @@ func SendReponse(c *gin.Context, err error, data interface{}, msg string) {
 	if data == nil {
 		data = make(map[string]interface{}, 0)
 	}
-	m := ApiFormat(uint8(code), data, msg)
+	m := ApiFormat(code, data, msg)
 	c.JSON(200, m)
 	c.Abort()
 }
