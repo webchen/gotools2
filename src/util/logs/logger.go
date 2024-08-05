@@ -66,10 +66,12 @@ func Info(format string, v ...interface{}) {
 
 	if fileLevel <= 1 {
 		fileLogger.Println(s)
+		fileLogger.SetFlags(0)
 	}
 
 	if cmdLevel <= 1 {
 		cmdLogger.Println(s)
+		cmdLogger.SetFlags(0)
 	}
 }
 
@@ -122,6 +124,7 @@ func Error(message string, data interface{}) {
 
 	if cmdLevel <= 3 {
 		cmdLogger.SetPrefix("[Error] ")
+		cmdLogger.SetFlags(0)
 		cmdLogger.Println(s)
 	}
 }
