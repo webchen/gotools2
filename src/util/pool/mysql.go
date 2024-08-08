@@ -13,6 +13,7 @@ import (
 	"github.com/webchen/gotools2/src/util/logs"
 
 	"xorm.io/xorm"
+	xlog "xorm.io/xorm/log"
 	"xorm.io/xorm/names"
 )
 
@@ -24,7 +25,7 @@ func InitMysql() error {
 	if base.IsBuild() {
 		return nil
 	}
-	//dbLog = base.CreateLogFileAccess("db.log")
+	dbLog := base.CreateLogFileAccess("sql")
 
 	list := conf.GetConfig("mysql", nil).(map[string]interface{})
 
@@ -42,12 +43,20 @@ func InitMysql() error {
 			return err
 		}
 		db.SetMapper(names.SnakeMapper{})
-		//db.ShowSQL(true)
+		db.ShowSQL(cast.ToBool(vv["showSQL"]))
 		db.SetMaxOpenConns(cast.ToInt(vv["maxOpen"]))
 		db.SetMaxIdleConns(cast.ToInt(vv["maxIdle"]))
 		db.TZLocation, _ = time.LoadLocation("Asia/Shanghai")
-		//db.ShowSQL(false)
-		//db.SetLogger(dbLog)
+
+		l := &xlog.SimpleLogger{
+			DEBUG: dbLog,
+			ERR:   dbLog,
+			INFO:  dbLog,
+			WARN:  dbLog,
+		}
+
+		db.SetLogger(l)
+
 		mysqlList[k] = db
 	}
 	return nil
