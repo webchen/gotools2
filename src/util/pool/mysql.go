@@ -2,6 +2,7 @@ package pool
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -43,7 +44,7 @@ func InitMysql() error {
 			return err
 		}
 		db.SetMapper(names.SnakeMapper{})
-		db.ShowSQL(cast.ToBool(vv["showSQL"]))
+		//db.ShowSQL(cast.ToBool(vv["showSQL"]))
 		db.SetMaxOpenConns(cast.ToInt(vv["maxOpen"]))
 		db.SetMaxIdleConns(cast.ToInt(vv["maxIdle"]))
 		db.TZLocation, _ = time.LoadLocation("Asia/Shanghai")
@@ -54,7 +55,8 @@ func InitMysql() error {
 			INFO:  dbLog,
 			WARN:  dbLog,
 		}
-
+		l.ShowSQL(cast.ToBool(vv["showSQL"]))
+		dbLog.SetFlags(log.Ldate | log.Lmicroseconds)
 		db.SetLogger(l)
 
 		mysqlList[k] = db

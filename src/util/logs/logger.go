@@ -86,10 +86,10 @@ func Warning(message string, data interface{}, withTrace bool) {
 	s := ""
 	if withTrace {
 		info.Trace = Trace(message)
-		s = fmt.Sprintf("[%s] %s \n%#v \n%s", info.Time, message, info.Data, info.Trace)
+		s = fmt.Sprintf("[%s] %s %#v %s", info.Time, message, info.Data, info.Trace)
 	} else {
 		info.Trace = ""
-		s = fmt.Sprintf("[%s] %s \n%#v", info.Time, message, info.Data)
+		s = fmt.Sprintf("[%s] %s %#v", info.Time, message, info.Data)
 	}
 
 	if fileLevel <= 2 {
@@ -114,7 +114,7 @@ func Error(message string, data interface{}) {
 	info.Data = data
 	info.Trace = Trace(message)
 
-	s := fmt.Sprintf("[%s] %s \n%#v", info.Time, message, info.Data)
+	s := fmt.Sprintf("[%s] %s %#v", info.Time, message, info.Data)
 
 	if fileLevel <= 3 {
 		fileLogger.SetPrefix("[Error] ")

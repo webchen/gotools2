@@ -118,7 +118,7 @@ func LogPanic(message string, data interface{}) {
 	info.Level = "Panic"
 	info.Trace = TraceInfo(message)
 
-	s := fmt.Sprintf("[%s] %s \n%#v", info.Time, message, info.Data)
+	s := fmt.Sprintf("[%s] %s %#v", info.Time, message, info.Data)
 
 	panicLogger.SetPrefix("")
 	panicLogger.SetFlags(0)
