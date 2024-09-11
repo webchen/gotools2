@@ -35,6 +35,14 @@ func MapCase2Cams(m map[string]string) map[string]string {
 	return mm
 }
 
+func MapCase2Cams2(m map[string]interface{}) map[string]interface{} {
+	mm := make(map[string]interface{})
+	for k, v := range m {
+		mm[Case2Cams(k)] = v
+	}
+	return mm
+}
+
 // RandString 随机字符串
 func RandString(length int) string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
