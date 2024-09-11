@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/webchen/gotools2/src/base"
 	"github.com/webchen/gotools2/src/fun"
-	"github.com/webchen/gotools2/src/util/logs"
 	"github.com/webchen/gotools2/src/util/model2"
 )
 
@@ -20,7 +20,7 @@ func HttpRecover(c *gin.Context) gin.HandlerFunc {
 				if e, ok := err.(string); ok {
 					msg = e
 				}
-				logs.Error(msg, data)
+				base.LogPanic(msg, data)
 				fun.SendErrorResponse(c, msg)
 				c.Abort()
 			}
