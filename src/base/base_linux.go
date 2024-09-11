@@ -1,3 +1,4 @@
+//go:build linux || darwin
 // +build linux darwin
 
 package base
@@ -11,9 +12,10 @@ import (
 
 var stdErrFileHandler *os.File
 
-func init() {
-	RewriteStderrFile()
-}
+// 不init，main手动调用即可
+//func init() {
+//	RewriteStderrFile()
+//}
 
 // RewriteStderrFile  重写panic日志输出
 func RewriteStderrFile() error {

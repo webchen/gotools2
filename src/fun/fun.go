@@ -10,7 +10,16 @@ import (
 	"time"
 
 	"github.com/webchen/gotools2/src/base/dirtool"
+	"github.com/webchen/gotools2/src/util/model2"
 )
+
+func HttpPanic(message string, data interface{}) {
+	obj := &model2.PanicMessage{
+		Message: message,
+		Data:    data,
+	}
+	panic(obj)
+}
 
 // 生成随机数
 func GetReqSeqId() string {
