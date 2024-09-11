@@ -7,7 +7,7 @@ import (
 	"github.com/webchen/gotools2/src/util/model2"
 )
 
-func HttpRecover(c *gin.Context) gin.HandlerFunc {
+func HttpRecover() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
