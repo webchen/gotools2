@@ -22,8 +22,8 @@ func HttpRecover() gin.HandlerFunc {
 				}
 				base.LogPanic(msg, data)
 				fun.SendErrorResponse(c, msg)
-				c.Abort()
 			}
 		}()
+		c.Next()
 	}
 }

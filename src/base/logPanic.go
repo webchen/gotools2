@@ -122,10 +122,10 @@ func LogPanic(message string, data interface{}) {
 
 	panicLogger.SetPrefix("")
 	panicLogger.SetFlags(0)
-	panicLogger.Println(s)
-	panicLogger.SetPrefix("[panic]")
+	//panicLogger.SetPrefix("[panic]")
 	//log.SetFlags(log.Ldate | log.Lmicroseconds)
 	panicLogger.Println(s)
+	fmt.Println(s)
 }
 
 // LogPanicErr 带ERROR的日志
