@@ -7,6 +7,8 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/webchen/gotools2/src/base/dirtool"
@@ -57,4 +59,13 @@ func DirToZip(directory string) string {
 		return nil
 	})
 	return n
+}
+
+// 中文unicode转中文字符串
+func ZhToUnicode(raw []byte) ([]byte, error) {
+	str, err := strconv.Unquote(strings.Replace(strconv.Quote(string(raw)), `\\u`, `\u`, -1))
+	if err != nil {
+		return nil, err
+	}
+	return []byte(str), nil
 }

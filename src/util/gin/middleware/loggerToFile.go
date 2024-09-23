@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/webchen/gotools2/src/fun"
 	"github.com/webchen/gotools2/src/util/logs"
 
 	"github.com/gin-gonic/gin"
@@ -60,13 +61,15 @@ func LoggerToFile() gin.HandlerFunc {
 
 		responseBody := blw.body.String()
 
+		p, _ := fun.ZhToUnicode(b)
+
 		logs.WebAccess("| %3d | %13v | %15s | %s | %s | %s | %s ",
 			statusCode,
 			latencyTime,
 			clientIP,
 			reqMethod,
 			reqUri,
-			string(b),
+			string(p),
 			responseBody,
 		)
 	}
