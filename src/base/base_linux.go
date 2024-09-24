@@ -14,11 +14,11 @@ var stdErrFileHandler *os.File
 
 // 不init，main手动调用即可
 //func init() {
-//	RewriteStderrFile()
+//	RewriteStdErrFile()
 //}
 
-// RewriteStderrFile  重写panic日志输出
-func RewriteStderrFile() error {
+// RewriteStdErrFile  重写panic日志输出
+func RewriteStdErrFile() error {
 	if runtime.GOOS == "windows" {
 		return nil
 	}

@@ -3,6 +3,6 @@
 
 package base
 
-func RewriteStderrFile() error {
+func RewriteStdErrFile() error {
 	return nil
 }

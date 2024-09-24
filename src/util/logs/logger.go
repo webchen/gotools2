@@ -86,20 +86,20 @@ func Warning(message string, data interface{}, withTrace bool) {
 	s := ""
 	if withTrace {
 		info.Trace = Trace(message)
-		s = fmt.Sprintf("[%s] %s %#v %s", info.Time, message, info.Data, info.Trace)
+		s = fmt.Sprintf("[%s] %s %#v %s", info.Time, info.Message, info.Data, info.Trace)
 	} else {
 		info.Trace = ""
-		s = fmt.Sprintf("[%s] %s %#v", info.Time, message, info.Data)
+		s = fmt.Sprintf("[%s] %s %#v", info.Time, info.Message, info.Data)
 	}
 
 	if fileLevel <= 2 {
-		fileLogger.SetPrefix("[Warning] ")
+		fileLogger.SetPrefix("[" + info.Level + "] ")
 		fileLogger.SetFlags(0)
 		fileLogger.Println(s)
 	}
 
 	if cmdLevel <= 2 {
-		cmdLogger.SetPrefix("[Warning] ")
+		cmdLogger.SetPrefix("[" + info.Level + "] ")
 		cmdLogger.SetFlags(0)
 		cmdLogger.Println(s)
 	}
@@ -114,16 +114,16 @@ func Error(message string, data interface{}) {
 	info.Data = data
 	info.Trace = Trace(message)
 
-	s := fmt.Sprintf("[%s] %s %#v", info.Time, message, info.Data)
+	s := fmt.Sprintf("[%s] %s %#v %s", info.Time, info.Message, info.Data, info.Trace)
 
 	if fileLevel <= 3 {
-		fileLogger.SetPrefix("[Error] ")
+		fileLogger.SetPrefix("[" + info.Level + "] ")
 		fileLogger.SetFlags(0)
 		fileLogger.Println(s)
 	}
 
 	if cmdLevel <= 3 {
-		cmdLogger.SetPrefix("[Error] ")
+		cmdLogger.SetPrefix("[" + info.Level + "] ")
 		cmdLogger.SetFlags(0)
 		cmdLogger.Println(s)
 	}
@@ -141,8 +141,9 @@ func ErrorProcess(err error, msg string, data interface{}) bool {
 
 // Show 打印一定会显示的信息（用于系统层面）
 func Show(format string, v ...interface{}) {
-	cmdLogger.SetPrefix("[show] ")
-	cmdLogger.Println(fmt.Sprintf(format, v...))
+	//cmdLogger.SetPrefix("[show] ")
+	//cmdLogger.Println(fmt.Sprintf(format, v...))
+	fmt.Printf(format+"\n", v...)
 	//log.Info(fmt.Sprintf(format, v...))
 }
 
