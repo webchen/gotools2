@@ -9,8 +9,6 @@ import (
 
 	"github.com/webchen/gotools2/src/base/conf"
 
-	"github.com/webchen/gotools2/src/base"
-
 	"github.com/webchen/gotools2/src/util/logs"
 
 	"github.com/spf13/cast"
@@ -24,13 +22,14 @@ var Ctx = context.Background()
 var redisClientList = make(map[string]*redis.Client)
 
 func InitRedis() error {
-	if base.IsBuild() {
-		return nil
-	}
+	/*
+		if base.IsBuild() {
+			return nil
+		}
+	*/
 	var redisList map[string]interface{}
 	redisList = conf.GetConfig("redis", redisList).(map[string]interface{})
 	if len(redisList) == 0 {
-		logs.Warning("redis config is nil", nil, false)
 		return fmt.Errorf("redis 配置为空")
 	}
 
@@ -72,6 +71,6 @@ func GetRedisClient(key string) *redis.Client {
 	if v, ok := redisClientList[key]; ok {
 		return v
 	}
-	logs.Warning("redis client ["+key+"] 不存在", nil, false)
-	return nil
+	logs.Warning("redis client ["+key+"] 不存在", redisClientList, false)
+	panic("redis client [" + key + "] 不存在")
 }

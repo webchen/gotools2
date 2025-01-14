@@ -23,13 +23,17 @@ var mysqlList = make(map[string]*xorm.Engine)
 //var dbLog *log.Logger
 
 func InitMysql() error {
-	if base.IsBuild() {
-		return nil
-	}
+	/*
+		if base.IsBuild() {
+			return nil
+		}
+	*/
 	dbLog := base.CreateLogFileAccess("sql")
 
 	list := conf.GetConfig("mysql", nil).(map[string]interface{})
-
+	if len(list) == 0 {
+		return fmt.Errorf("mysql 配置为空")
+	}
 	for k, v := range list {
 		vv := v.(map[string]interface{})
 		dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=True", vv["user"], vv["password"], vv["host"], vv["port"], vv["db"], vv["charset"])
@@ -74,5 +78,5 @@ func GetMysqlClient(key string) *xorm.Engine {
 		return v
 	}
 	logs.Warning("mysql client ["+key+"] 不存在", mysqlList, false)
-	return nil
+	panic("mysql client [" + key + "] 不存在")
 }
