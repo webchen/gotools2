@@ -25,9 +25,14 @@ func LoadFromByte(bytes []byte, v interface{}) {
 
 // LoadFromString 从string转json对象
 func LoadFromString(str string, v interface{}) {
+	LoadFromString2(str, v)
+	//json.Unmarshal([]byte(str), &v)
+}
+
+func LoadFromString2(str string, v interface{}) error {
 	d := json.NewDecoder(strings.NewReader(str))
 	d.UseNumber()
-	d.Decode(&v)
+	return d.Decode(&v)
 	//json.Unmarshal([]byte(str), &v)
 }
 

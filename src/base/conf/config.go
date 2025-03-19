@@ -2,6 +2,7 @@ package conf
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/webchen/gotools2/src/base"
@@ -25,7 +26,7 @@ var baseConfigData map[string]map[string]interface{}
 
 var loadTime time.Time = time.Now()
 
-//var configLock sync.RWMutex
+var configLock sync.RWMutex
 
 func init() {
 	toInit()
@@ -56,6 +57,8 @@ func toInit() {
 func initLocal() {
 	dir := dirtool.GetConfigPath()
 	fileList, _ := filepath.Glob(filepath.Join(dir, "*"))
+	configLock.Lock()
+	defer configLock.Unlock()
 	for j := range fileList {
 		ext := path.Ext(fileList[j])
 		if ext == ".json" {
@@ -66,6 +69,10 @@ func initLocal() {
 		}
 	}
 	loadTime = time.Now()
+}
+
+func Reload() {
+	initLocal()
 }
 
 func checkBaseConfigData() bool {
@@ -79,7 +86,7 @@ func loadBaseConfig() {
 	f := dirtool.GetConfigPath() + "baseConfig.json"
 	exists, _ := dirtool.PathExist(f)
 	if !exists {
-		fmt.Println("loadBaseConfig error, baseConfig.json not exists")
+		fmt.Println("tips, " + f + " not exists")
 		return
 	}
 	jsontool.LoadFromFile(f, &baseConfigData)
@@ -145,8 +152,8 @@ func initApollo() {
 
 // GetConfig 获取JSON的配置，key支持"."操作，如：GetConfig("conf.runtime")，表示获取conf.json文件里面，runtime的值
 func GetConfig(key string, def interface{}) interface{} {
-	//	configLock.RLock()
-	//	defer configLock.RUnlock()
+	configLock.RLock()
+	defer configLock.RUnlock()
 
 	defer func() {
 		recover()
@@ -190,4 +197,15 @@ func GetEnv(key, defaultValue string) string {
 
 func GetLoadTime() time.Time {
 	return loadTime
+}
+
+func SaveConfig(jsonData string, fileName string) error {
+	var v interface{}
+	err := jsontool.LoadFromString2(jsonData, &v)
+	if err != nil {
+		return err
+	}
+	p := dirtool.GetConfigPath() + fileName + ".json"
+	err = os.WriteFile(p, []byte(jsonData), 0x666)
+	return err
 }
