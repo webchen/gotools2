@@ -11,7 +11,6 @@ import (
 
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -56,18 +55,17 @@ func toInit() {
 
 func initLocal() {
 	dir := dirtool.GetConfigPath()
-	fileList, _ := filepath.Glob(filepath.Join(dir, "*"))
-	configLock.Lock()
-	defer configLock.Unlock()
-	for j := range fileList {
-		ext := path.Ext(fileList[j])
+	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		ext := filepath.Ext(path)
 		if ext == ".json" {
-			fileName := strings.ReplaceAll(strings.ReplaceAll(fileList[j], filepath.Dir(fileList[j])+string(os.PathSeparator), ""), ext, "")
+			fileName := strings.ReplaceAll(strings.ReplaceAll(path, dir, ""), ext, "")
+			fileName = strings.ReplaceAll(fileName, string(os.PathSeparator), "/")
 			conf := make(map[string]interface{})
-			jsontool.LoadFromFile(fileList[j], &conf)
+			jsontool.LoadFromFile(path, &conf)
 			config[fileName] = conf
 		}
-	}
+		return nil
+	})
 	loadTime = time.Now()
 }
 
