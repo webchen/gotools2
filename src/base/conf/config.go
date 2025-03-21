@@ -134,7 +134,6 @@ func initApollo() {
 		NamespaceName: baseConfigData["apollo"]["namespace"].(string),
 		Secret:        baseConfigData["apollo"]["secret"].(string),
 	}
-	//	agollo.SetLogger(&log.DefaultLogger{})
 	client, _ := agollo.StartWithConfig(func() (*apolloConfig.AppConfig, error) {
 		return c, nil
 	})
@@ -143,12 +142,8 @@ func initApollo() {
 	cache.Range(func(key, value interface{}) bool {
 		configFilePath := dirtool.GetConfigPath() + key.(string) + ".json"
 		os.WriteFile(configFilePath, []byte(value.(string)), 0777)
-		//fmt.Printf("key: %+v   val:%+v\n", key, value)
 		return true
 	})
-
-	//	value, _ := cache.Get("es")
-	//	fmt.Printf("%+v\n%+v\n", cache, value)
 }
 
 // GetConfig 获取JSON的配置，key支持"."操作，如：GetConfig("conf.runtime")，表示获取conf.json文件里面，runtime的值
