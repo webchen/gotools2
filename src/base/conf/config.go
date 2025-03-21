@@ -54,6 +54,9 @@ func toInit() {
 }
 
 func initLocal() {
+	configLock.Lock()
+	defer configLock.Unlock()
+	config = make(map[string]map[string]interface{})
 	dir := dirtool.GetConfigPath()
 	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		ext := filepath.Ext(path)
