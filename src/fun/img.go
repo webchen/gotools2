@@ -26,7 +26,7 @@ func SaveFileToLocal(url, save_path string) string {
 	ext := strings.ToLower(path.Ext(p))
 	nss := ""
 	if ext == ".jpg" || ext == ".jpeg" || ext == ".png" {
-		nss = string(CompressImageResource([]byte(ss), ext))
+		nss = string(CompressImageResource([]byte(ss), ext, 1))
 	}
 	_, err := io.WriteString(f, nss)
 	if err != nil {
@@ -36,7 +36,10 @@ func SaveFileToLocal(url, save_path string) string {
 }
 
 // 压缩图片，控制在2M以内，仅仅支持 jpg/jpeg/png
-func CompressImageResource(data []byte, ext string) []byte {
+func CompressImageResource(data []byte, ext string, times int) []byte {
+	if times <= 0 {
+		times = 1
+	}
 	if len(data) < 1024*1024*2 {
 		return data
 	}
@@ -53,16 +56,17 @@ func CompressImageResource(data []byte, ext string) []byte {
 	}
 
 	// 修改图片的大小
-	m := resize.Resize(0, 0, img, resize.Lanczos3)
+	h := 1080 / times
+	m := resize.Resize(0, uint(h), img, resize.Lanczos3)
 	buf := bytes.Buffer{}
 
 	// 修改图片的质量
-	err = jpeg.Encode(&buf, m, &jpeg.Options{Quality: 80})
+	err = jpeg.Encode(&buf, m, &jpeg.Options{Quality: 60})
 	if err != nil {
 		return data
 	}
-	if buf.Len() > len(data) {
-		return data
+	if buf.Len() > 1024*1024*2 {
+		return CompressImageResource(buf.Bytes(), ext, times+1)
 	}
 	return buf.Bytes()
 }
