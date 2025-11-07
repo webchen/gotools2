@@ -58,15 +58,18 @@ func LoggerToFile() gin.HandlerFunc {
 		statusCode := c.Writer.Status()
 		// 请求IP
 		clientIP := c.ClientIP()
+		// trace_id
+		traceId := c.DefaultQuery("traceid", "")
 
 		responseBody := blw.body.String()
 
 		p, _ := fun.ZhToUnicode(b)
 
-		logs.WebAccess("| %3d | %13v | %15s | %s | %s | %s | %s ",
+		logs.WebAccess("| %3d | %13v | %15s | %s | %s | %s | %s | %s ",
 			statusCode,
 			latencyTime,
 			clientIP,
+			traceId,
 			reqMethod,
 			reqUri,
 			string(p),
