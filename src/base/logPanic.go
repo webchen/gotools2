@@ -129,22 +129,25 @@ func getClearLogCmdPath(fullFile string, total int) (path string) {
 	}
 	fileDir := filepath.Dir(fullFile)
 	fileName := filepath.Base(fullFile)
-	fileExt := filepath.Ext(fullFile)
+	fileExt := filepath.Ext(fullFile) // 带"."
 	fileName = strings.ReplaceAll(fileName, fileExt, "")
 	info := `# /user/bin
 d=$(date +"%Y%m%d%H%M%S")
 fileName="@fileName@"
 dir="@fileDir@"
 back_dir=${dir}/back
+ext="@fileExt@"
 n=$(find ${back_dir} -type f | wc -l)
 if [ $n -gt @total@ ]; then
-find ${back_dir} -type f -printf '%T+ %p\n' | sort | head -n 1 | xargs rm -rf
+find ${back_dir} -type f | grep "\@fileExt@" -printf '%T+ %p\n' | sort | head -n 1 | xargs rm -rf
 fi
-mv ${dir}/${fileName}.log ${back_dir}/${fileName}_${d}.log
-chmod 0777 ${dir}/${fileName}.log
-echo '' > ${dir}/${fileName}.log`
+mv ${dir}/${fileName}${ext} ${back_dir}/${fileName}_${d}${ext}
+chmod 0777 ${dir}/${fileName}${ext}
+echo '' > ${dir}/${fileName}${ext}
+`
+	info = strings.ReplaceAll(info, "@fileExt@", fileExt)
 	info = strings.ReplaceAll(info, "@fileName@", fileName)
-	info = strings.ReplaceAll(info, "@dileDir@", fileDir)
+	info = strings.ReplaceAll(info, "@fileDir@", fileDir)
 	info = strings.ReplaceAll(info, "@total@", cast.ToString(total))
 	path = dirtool.GetBasePath() + fileName + ".sh"
 	os.WriteFile(path, []byte(info), 0777)
