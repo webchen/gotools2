@@ -139,7 +139,7 @@ back_dir=${dir}/back
 ext="@fileExt@"
 n=$(find ${back_dir} -type f | wc -l)
 if [ $n -gt @total@ ]; then
-find ${back_dir} -type f | grep "\@fileExt@" -printf '%T+ %p\n' | sort | head -n 1 | xargs rm -rf
+find ${back_dir} -type f | grep "@fileName@" | grep "\@fileExt@" -printf '%T+ %p\n' | sort | head -n 1 | xargs rm -rf
 fi
 mv ${dir}/${fileName}${ext} ${back_dir}/${fileName}_${d}${ext}
 chmod 0777 ${dir}/${fileName}${ext}
