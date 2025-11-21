@@ -60,40 +60,11 @@ func CreateLogFileAccess(fileName string) (l *log.Logger) {
 		for {
 			<-ticker.C
 			info, _ := os.Stat(fullFile)
-			if info.Size() >= 1024*1024*logFileSize {
-				/*
-					lock.Lock()
-					newFile := d + fileName + "_" + time.Now().Format("20060102150405") + ".log"
-					newFileObj, err := os.OpenFile(newFile, os.O_WRONLY|os.O_CREATE, 0777)
-
-					fmt.Println(newFile, err)
-
-					i, err := io.Copy(newFileObj, file)
-					fmt.Println(i, err)
-
-					newFileObj.Close()
-					file.Close()
-
-					if logFileCount > 0 {
-						ll := getLogFileList(d)
-						count := len(ll)
-						if count >= logFileCount {
-							// 找出最老的，删了
-							m := make([]int, 0)
-							for _, v := range ll {
-								m = append(m, cast.ToInt(v))
-							}
-							sort.Ints(m) // 小到大，第1个就是最老的
-							os.Remove(d + ll[cast.ToInt64(m[0])])
-						}
-					}
-
-					//file.Close()
-					os.Remove(fullFile)
-				*/
+			size := 1024 * 1024 * logFileSize
+			if info.Size() >= size {
 				lock.Lock()
 				file.Close()
-				cmdFile := getClearLogCmdPath(fullFile, logFileCount)
+				cmdFile := getClearLogCmdPath(fullFile, logFileCount, size)
 				cmd := exec.Command("sh", cmdFile)
 				cmd.Run()
 				file, _ := os.OpenFile(fullFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
@@ -106,24 +77,7 @@ func CreateLogFileAccess(fileName string) (l *log.Logger) {
 	return l
 }
 
-/*
-func getLogFileList(d string) map[int64]string {
-	infos, err := os.ReadDir(d)
-	if err != nil {
-		return nil
-	}
-	r := make(map[int64]string)
-	for _, v := range infos {
-		if !v.IsDir() {
-			vv, _ := v.Info()
-			r[vv.ModTime().Unix()] = v.Name()
-		}
-	}
-	return r
-}
-*/
-
-func getClearLogCmdPath(fullFile string, total int) (path string) {
+func getClearLogCmdPath(fullFile string, total int, size int64) (path string) {
 	if strings.TrimSpace(fullFile) == "" || IsWIN() {
 		return ""
 	}
@@ -137,18 +91,25 @@ fileName="@fileName@"
 dir="@fileDir@"
 back_dir=${dir}/back
 ext="@fileExt@"
-n=$(find ${back_dir} -type f | wc -l)
-if [ $n -gt @total@ ]; then
-find ${back_dir} -type f | grep "@fileName@" | grep "\@fileExt@" -printf '%T+ %p\n' | sort | head -n 1 | xargs rm -rf
+logFile=${dir}/${fileName}${ext}
+sz=$(ls -l ${logFile} | awk '{print $5}')
+if [ $sz -lt @size@ ]; then
+	exit 0
 fi
-mv ${dir}/${fileName}${ext} ${back_dir}/${fileName}_${d}${ext}
-chmod 0777 ${dir}/${fileName}${ext}
-echo '' > ${dir}/${fileName}${ext}
+n=$(${back_dir} -type f -printf '%T+ %p\n' | grep "@fileName@_" | grep "\@fileExt@" | wc -l)
+((n2=$n-@total@))
+if [ $n -gt 0 ]; then
+find ${back_dir} -type f -printf '%T+ %p\n' | grep "@fileName@_" | grep "\@fileExt@" | sort | head -n $n2 | xargs rm -rf
+mv ${logFile} ${back_dir}/${fileName}_${d}${ext}
+touch ${logFile}
+chmod 0777 ${logFile}
+fi
 `
 	info = strings.ReplaceAll(info, "@fileExt@", fileExt)
 	info = strings.ReplaceAll(info, "@fileName@", fileName)
 	info = strings.ReplaceAll(info, "@fileDir@", fileDir)
 	info = strings.ReplaceAll(info, "@total@", cast.ToString(total))
+	info = strings.ReplaceAll(info, "@size@", cast.ToString(size))
 	path = dirtool.GetBasePath() + fileName + ".sh"
 	os.WriteFile(path, []byte(info), 0777)
 	return path
