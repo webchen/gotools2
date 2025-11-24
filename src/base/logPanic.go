@@ -95,14 +95,15 @@ logFile=${dir}/${fileName}${ext}
 sz=$(ls -l ${logFile} | awk '{print $5}')
 if [ $sz -lt @size@ ]; then
 	exit 0
+else
+	mv ${logFile} ${back_dir}/${fileName}_${d}${ext}
+	touch ${logFile}
+	chmod 0777 ${logFile}
 fi
 n=$(${back_dir} -type f -printf '%T+ %p\n' | grep "@fileName@_" | grep "\@fileExt@" | wc -l)
 ((n2=$n-@total@))
-if [ $n -gt 0 ]; then
+if [ $n2 -gt 0 ]; then
 find ${back_dir} -type f -printf '%T+ %p\n' | grep "@fileName@_" | grep "\@fileExt@" | sort | head -n $n2 | xargs rm -rf
-mv ${logFile} ${back_dir}/${fileName}_${d}${ext}
-touch ${logFile}
-chmod 0777 ${logFile}
 fi
 `
 	info = strings.ReplaceAll(info, "@fileExt@", fileExt)
