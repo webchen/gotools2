@@ -25,7 +25,14 @@ func SendMail(to, name, subject, body, mailType string, files []string) error {
 	m.SetHeader("From", from)
 	m.SetHeader("To", to)
 	m.SetHeader("Subject", name)
-	m.SetBody("text/html", strings.ReplaceAll(body, "\n", "<br />"))
+	contentType := ""
+	if mailType == "html" {
+		contentType = "Content-Type: text/" + mailType + "; charset=UTF-8"
+		body = strings.ReplaceAll(body, "\n", "<br />")
+	} else {
+		contentType = "Content-Type: text/plain" + "; charset=UTF-8"
+	}
+	m.SetBody(contentType, body)
 	if len(files) > 0 {
 		for _, v := range files {
 			has, _ := fileExists(v)
