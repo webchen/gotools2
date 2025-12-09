@@ -91,6 +91,13 @@ fileName="@fileName@"
 dir="@fileDir@"
 back_dir=${dir}/back
 ext="@fileExt@"
+
+n=$(find ${back_dir} -type f -printf '%T+ %p\n' | grep "@fileName@_" | grep "\@fileExt@" | wc -l)
+((n2=$n-@total@))
+if [ $n2 -gt 0 ]; then
+find ${back_dir} -type f -printf '%T+ %p\n' | grep "@fileName@_" | grep "\@fileExt@" | sort | head -n $n2 | xargs rm -rf
+fi
+
 logFile=${dir}/${fileName}${ext}
 sz=$(ls -l ${logFile} | awk '{print $5}')
 if [ $sz -lt @size@ ]; then
@@ -100,11 +107,7 @@ else
 	touch ${logFile}
 	chmod 0777 ${logFile}
 fi
-n=$(${back_dir} -type f -printf '%T+ %p\n' | grep "@fileName@_" | grep "\@fileExt@" | wc -l)
-((n2=$n-@total@))
-if [ $n2 -gt 0 ]; then
-find ${back_dir} -type f -printf '%T+ %p\n' | grep "@fileName@_" | grep "\@fileExt@" | sort | head -n $n2 | xargs rm -rf
-fi
+
 `
 	info = strings.ReplaceAll(info, "@fileExt@", fileExt)
 	info = strings.ReplaceAll(info, "@fileName@", fileName)
