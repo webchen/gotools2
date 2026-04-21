@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/webchen/gotools2/src/base"
 	"github.com/webchen/gotools2/src/base/dirtool"
@@ -86,9 +87,9 @@ func DoBuild(osName string) {
 	cmd := exec.Command(tmpFile)
 	err := cmd.Run()
 	if err != nil {
-		fmt.Printf("build error : %+v\n", err)
+		fmt.Printf("[%s] build error : %+v\n", time.Now().Format(time.DateTime), err)
 	} else {
-		fmt.Printf("build success ...\ndirectory : %s\n", deployPath)
+		fmt.Printf("[%s] build success -->  directory : %s\n", time.Now().Format(time.DateTime), deployPath)
 	}
 	os.Remove(tmpFile)
 

@@ -93,8 +93,6 @@ func loadBaseConfigFromEnv() {
 	host := strings.TrimSpace(GetEnv("CONSUL_HTTP_ADDR", ""))
 	files := strings.TrimSpace(GetEnv("CONSUL_CONFIG_FILES", ""))
 
-	fmt.Println("open --> ", open, " folder --> ", folder, " token --> ", token, " host --> ", host, " files --> ", files)
-
 	ff := make([]any, 0)
 	if files != "" {
 		for _, v := range strings.Split(files, ",") {
