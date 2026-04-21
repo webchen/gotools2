@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/spf13/cast"
 	"github.com/webchen/gotools2/src/base"
 	"github.com/webchen/gotools2/src/base/dirtool"
 	"github.com/webchen/gotools2/src/base/jsontool"
@@ -19,9 +20,9 @@ import (
 )
 
 // 全局配置变量
-var config = make(map[string]map[string]interface{})
+var config = make(map[string]map[string]any)
 
-var baseConfigData map[string]map[string]interface{}
+var baseConfigData map[string]map[string]any
 
 var loadTime time.Time = time.Now()
 
@@ -56,14 +57,14 @@ func toInit() {
 func initLocal() {
 	configLock.Lock()
 	defer configLock.Unlock()
-	config = make(map[string]map[string]interface{})
+	config = make(map[string]map[string]any)
 	dir := dirtool.GetConfigPath()
 	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		ext := filepath.Ext(path)
 		if ext == ".json" {
 			fileName := strings.ReplaceAll(strings.ReplaceAll(path, dir, ""), ext, "")
 			fileName = strings.ReplaceAll(fileName, string(os.PathSeparator), "/")
-			conf := make(map[string]interface{})
+			conf := make(map[string]any)
 			jsontool.LoadFromFile(path, &conf)
 			config[fileName] = conf
 		}
@@ -77,7 +78,45 @@ func Reload() {
 }
 
 func checkBaseConfigData() bool {
+	// 新增判断ENV变量，但是优先从baseConfig.json加载
+	if baseConfigData != nil {
+		return true
+	}
+	loadBaseConfigFromEnv()
 	return baseConfigData != nil
+}
+
+func loadBaseConfigFromEnv() {
+	open := cast.ToInt(GetEnv("CONSUL_OPEN", "0"))
+	folder := strings.TrimSpace(GetEnv("CONSUL_FOLDER", ""))
+	token := strings.TrimSpace(GetEnv("CONSUL_TOKEN", ""))
+	host := strings.TrimSpace(GetEnv("CONSUL_HTTP_ADDR", ""))
+	files := strings.TrimSpace(GetEnv("CONSUL_CONFIG_FILES", ""))
+
+	fmt.Println("open --> ", open, " folder --> ", folder, " token --> ", token, " host --> ", host, " files --> ", files)
+
+	ff := make([]any, 0)
+	if files != "" {
+		for _, v := range strings.Split(files, ",") {
+			ff = append(ff, v)
+		}
+	}
+
+	if open == 1 && folder != "" && host != "" && files != "" && token != "" {
+		baseConfigData = make(map[string]map[string]any)
+		baseConfigData["configType"] = map[string]any{
+			"name": "consul",
+		}
+		baseConfigData["consul"] = map[string]any{
+			"folder": folder,
+			"files":  ff,
+			"token":  token,
+			"server": []any{host},
+		}
+
+		f := dirtool.GetConfigPath() + "baseConfig.json"
+		os.WriteFile(f, []byte(jsontool.MarshalToString(baseConfigData)), 0666)
+	}
 }
 
 func loadBaseConfig() {
@@ -98,7 +137,7 @@ func initConsul() {
 		return
 	}
 	prefix := baseConfigData["consul"]["folder"].(string)
-	for _, v := range baseConfigData["consul"]["files"].([]interface{}) {
+	for _, v := range baseConfigData["consul"]["files"].([]any) {
 		if !strings.HasSuffix(prefix, "/") {
 			prefix += "/"
 		}
@@ -112,8 +151,8 @@ func initConsul() {
 			continue
 		}
 		fileName := dirtool.GetConfigPath() + v.(string) + ".json"
-		os.WriteFile(fileName, r.Value, 0x666)
-		fmt.Println("write config file : ", fileName)
+		err = os.WriteFile(fileName, r.Value, 0666)
+		fmt.Println("write config file : ", fileName, " error : ", err)
 	}
 }
 
@@ -139,7 +178,7 @@ func initApollo() {
 	})
 
 	cache := client.GetConfigCache(c.NamespaceName)
-	cache.Range(func(key, value interface{}) bool {
+	cache.Range(func(key, value any) bool {
 		configFilePath := dirtool.GetConfigPath() + key.(string) + ".json"
 		os.WriteFile(configFilePath, []byte(value.(string)), 0777)
 		return true
@@ -147,7 +186,7 @@ func initApollo() {
 }
 
 // GetConfig 获取JSON的配置，key支持"."操作，如：GetConfig("conf.runtime")，表示获取conf.json文件里面，runtime的值
-func GetConfig(key string, def interface{}) interface{} {
+func GetConfig(key string, def any) any {
 	configLock.RLock()
 	defer configLock.RUnlock()
 
@@ -172,11 +211,11 @@ func GetConfig(key string, def interface{}) interface{} {
 		return confDeep
 	}
 	for j := 2; j < len(arr); j++ {
-		c, _ := confDeep.(interface{})
+		c, _ := confDeep.(any)
 		if c == nil {
 			return def
 		}
-		confDeep = confDeep.(map[string]interface{})[arr[j]]
+		confDeep = confDeep.(map[string]any)[arr[j]]
 		if confDeep == nil {
 			return def
 		}
@@ -196,7 +235,7 @@ func GetLoadTime() time.Time {
 }
 
 func SaveConfig(jsonData string, fileName string) error {
-	var v interface{}
+	var v any
 	err := jsontool.LoadFromString2(jsonData, &v)
 	if err != nil {
 		return err
