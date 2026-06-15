@@ -40,7 +40,8 @@ func CompressImageResource(data []byte, ext string, times int) []byte {
 	if times <= 0 {
 		times = 1
 	}
-	if len(data) < 1024*1024*2 {
+	maxSize := 1024 * 1024 // 把图片压缩到1M以内，这样整个ZIP包就不会超大了
+	if len(data) < maxSize {
 		return data
 	}
 	var img image.Image
@@ -65,7 +66,7 @@ func CompressImageResource(data []byte, ext string, times int) []byte {
 	if err != nil {
 		return data
 	}
-	if buf.Len() > 1024*1024*2 {
+	if buf.Len() > maxSize {
 		return CompressImageResource(buf.Bytes(), ext, times+1)
 	}
 	return buf.Bytes()

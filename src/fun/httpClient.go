@@ -160,7 +160,7 @@ func getBaseData(s string) (map[string]interface{}, error) {
 	if ok {
 		return d, nil
 	}
-	return nil, fmt.Errorf(msg)
+	return nil, nil
 }
 
 func getSuccessData(s string) map[string]interface{} {
@@ -197,7 +197,7 @@ func getBaseList(s string) ([]interface{}, error) {
 	if ok {
 		return d, nil
 	}
-	return nil, fmt.Errorf(msg)
+	return nil, nil
 }
 
 func getSuccessDataList(s string) []interface{} {
