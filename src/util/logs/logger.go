@@ -44,15 +44,17 @@ func newCmdLogger(level string) *log.Logger {
 // Debug 日志
 func Debug(format string, v ...interface{}) {
 	s := fmt.Sprintf(format, v...)
-
-	fileLogger.SetPrefix("[Debug] ")
-	cmdLogger.SetPrefix("[Debug] ")
+	t := time.Now().Format(time.DateTime + ".999")
+	fileLogger.SetPrefix("[info] [" + t + "] ")
+	cmdLogger.SetPrefix("[info] [" + t + "] ")
 
 	if fileLevel == 0 {
+		fileLogger.SetFlags(0)
 		fileLogger.Println(s)
 	}
 
 	if cmdLevel == 0 {
+		cmdLogger.SetFlags(0)
 		cmdLogger.Println(s)
 	}
 }
@@ -65,13 +67,13 @@ func Info(format string, v ...interface{}) {
 	cmdLogger.SetPrefix("[info] [" + t + "] ")
 
 	if fileLevel <= 1 {
-		fileLogger.Println(s)
 		fileLogger.SetFlags(0)
+		fileLogger.Println(s)
 	}
 
 	if cmdLevel <= 1 {
-		cmdLogger.Println(s)
 		cmdLogger.SetFlags(0)
+		cmdLogger.Println(s)
 	}
 }
 
