@@ -163,18 +163,38 @@ func LogPanicErr(err interface{}, message string) {
 	}()
 }
 
+// maxTraceDepth 堆栈采集深度上限（runtime.Caller 的 i 终止值，最多 maxTraceDepth-1 帧）
+// 默认 10，可由 logs 包按 conf.logTraceDepth 覆盖；上限 40 防止采过深拖慢日志
+var maxTraceDepth = 10
+
+// SetTraceDepth 设置堆栈采集深度上限；取值超出 1..40 时忽略，保持当前值
+func SetTraceDepth(n int) {
+	if n > 0 && n <= 40 {
+		maxTraceDepth = n
+	}
+}
+
 // TraceInfo 返回TRACE信息
 func TraceInfo(v interface{}) string {
-	errstr := fmt.Sprintf("%+v%s%s", v, fmt.Sprintln(), separator) + fmt.Sprintln()
-	i := 2
-	for {
+	// 用 Builder 一次成型：原实现 errstr += fmt.Sprintf(...) 每帧整串重拷，39 帧时是 O(n²)
+	var sb strings.Builder
+	sb.Grow(512)
+	fmt.Fprintf(&sb, "%+v\n%s\n", v, separator)
+	for i := 2; i <= maxTraceDepth; i++ {
 		pc, file, line, ok := runtime.Caller(i)
-		if !ok || i > 40 {
+		if !ok {
 			break
 		}
-		errstr += fmt.Sprintf("stack: %d [file: %s:%d] [func: %s]\n", i-1, file, line, runtime.FuncForPC(pc).Name())
-		i++
+		sb.WriteString("stack: ")
+		sb.WriteString(cast.ToString(i - 1))
+		sb.WriteString(" [file: ")
+		sb.WriteString(file)
+		sb.WriteString(":")
+		sb.WriteString(cast.ToString(line))
+		sb.WriteString("] [func: ")
+		sb.WriteString(runtime.FuncForPC(pc).Name())
+		sb.WriteString("]\n")
 	}
-	errstr += separator
-	return errstr
+	sb.WriteString(separator)
+	return sb.String()
 }
