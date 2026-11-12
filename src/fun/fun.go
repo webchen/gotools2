@@ -3,16 +3,17 @@ package fun
 import (
 	"archive/zip"
 	"bytes"
-	"fmt"
 	"io"
-	"math/rand"
 	"os"
 	"path/filepath"
+	"strconv"
+	"sync/atomic"
 	"time"
 	"unicode/utf16"
 	"unicode/utf8"
 
 	"github.com/webchen/gotools2/src/base/dirtool"
+	"github.com/webchen/gotools2/src/util/logs"
 	"github.com/webchen/gotools2/src/util/model2"
 )
 
@@ -24,41 +25,60 @@ func HttpPanic(message string, data interface{}) {
 	panic(obj)
 }
 
-// 生成随机数
+var reqSeq atomic.Uint64
+
+// GetReqSeqId 返回进程内唯一的请求序号：秒级时间 + 严格递增序号。
 func GetReqSeqId() string {
-	strTime := time.Now().Format("20060102150405")
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
-	num := fmt.Sprintf("%d", r1.Intn(1000)+1000)
-	return strTime + num
+	n := reqSeq.Add(1)
+	return time.Now().Format("20060102150405") + strconv.FormatUint(n, 10)
 }
 
 // 目录打包到ZIP
 func DirToZip(directory string) string {
 	n := dirtool.GetCWDPath() + "tmp" + string(os.PathSeparator) + GetReqSeqId() + ".zip"
-	zipWriter, _ := os.Create(n)
+	zipWriter, err := os.Create(n)
+	if err != nil {
+		logs.Error("DirToZip create zip file fail", err)
+		return ""
+	}
 	defer zipWriter.Close()
 	archive := zip.NewWriter(zipWriter)
 	defer archive.Close()
-	filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
+	walkErr := filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		header, _ := zip.FileInfoHeader(info)
+		header, err := zip.FileInfoHeader(info)
+		if err != nil {
+			return err
+		}
 		header.Method = zip.Deflate
-		header.Name, _ = filepath.Rel(directory, path)
+		header.Name, err = filepath.Rel(directory, path)
+		if err != nil {
+			return err
+		}
 		if info.IsDir() {
 			header.Name += "/"
 		}
-		headerWriter, _ := archive.CreateHeader(header)
+		headerWriter, err := archive.CreateHeader(header)
+		if err != nil {
+			return err
+		}
 		if info.IsDir() {
 			return nil
 		}
-		f, _ := os.Open(path)
-		defer f.Close()
-		_, _ = io.Copy(headerWriter, f)
-		return nil
+		f, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		// 不 defer：Walk 结束前及时释放句柄，避免大目录耗尽 fd
+		_, err = io.Copy(headerWriter, f)
+		f.Close()
+		return err
 	})
+	if walkErr != nil {
+		logs.Error("DirToZip walk fail", walkErr)
+	}
 	return n
 }
 

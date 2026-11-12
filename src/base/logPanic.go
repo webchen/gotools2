@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
-	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
@@ -36,100 +34,48 @@ func init() {
 func CreateLogFileAccess(fileName string) (l *log.Logger) {
 	d := LogDir()
 	fullFile := d + fileName + ".log"
-	file, err := os.OpenFile(fullFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
+	maxSize, maxCount := logRotateConfig()
+	w, err := newRotateWriter(fullFile, maxSize, maxCount)
 	if err != nil {
 		log.Fatalln("创建日志失败：", err)
 	}
-	l = new(log.Logger)
-	l.SetFlags(log.Lmicroseconds)
-
-	ticker := time.NewTicker(time.Minute * 1)
-	lock := &sync.RWMutex{}
-
-	cfg := make(map[string]interface{})
-	jsontool.LoadFromFile(dirtool.GetBasePath()+"config"+string(os.PathSeparator)+"system.json", &cfg)
-
-	logFileSize := cast.ToInt64(cfg["logFileSize"])
-	logFileCount := cast.ToInt(cfg["logFileCount"])
-
-	if logFileSize <= 0 {
-		logFileSize = 500 // 默认500MB
-	}
-
-	Go(func() {
-		for {
-			<-ticker.C
-			info, _ := os.Stat(fullFile)
-			size := 1024 * 1024 * logFileSize
-			if info.Size() >= size {
-				lock.Lock()
-				file.Close()
-				cmdFile := getClearLogCmdPath(fullFile, logFileCount, size)
-				cmd := exec.Command("sh", cmdFile)
-				cmd.Run()
-				file, _ := os.OpenFile(fullFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0777)
-				l.SetOutput(file)
-				lock.Unlock()
-			}
-		}
-	})
-	l.SetOutput(file)
+	l = log.New(w, "", log.Lmicroseconds)
 	return l
 }
 
-func getClearLogCmdPath(fullFile string, total int, size int64) (path string) {
-	if strings.TrimSpace(fullFile) == "" || IsWIN() {
-		return ""
-	}
-	fileDir := filepath.Dir(fullFile)
-	fileName := filepath.Base(fullFile)
-	fileExt := filepath.Ext(fullFile) // 带"."
-	fileName = strings.ReplaceAll(fileName, fileExt, "")
-	info := `# /user/bin
-d=$(date +"%Y%m%d%H%M%S")
-fileName="@fileName@"
-dir="@fileDir@"
-back_dir=${dir}/back
-ext="@fileExt@"
-
-n=$(find ${back_dir} -type f -printf '%T+ %p\n' | grep "@fileName@_" | grep "\@fileExt@" | wc -l)
-((n2=$n-@total@))
-if [ $n2 -gt 0 ]; then
-find ${back_dir} -type f -printf '%T+ %p\n' | grep "@fileName@_" | grep "\@fileExt@" | sort | head -n $n2 | xargs rm -rf
-fi
-
-logFile=${dir}/${fileName}${ext}
-sz=$(ls -l ${logFile} | awk '{print $5}')
-if [ $sz -lt @size@ ]; then
-	exit 0
-else
-	mv ${logFile} ${back_dir}/${fileName}_${d}${ext}
-	touch ${logFile}
-	chmod 0777 ${logFile}
-fi
-
-`
-	info = strings.ReplaceAll(info, "@fileExt@", fileExt)
-	info = strings.ReplaceAll(info, "@fileName@", fileName)
-	info = strings.ReplaceAll(info, "@fileDir@", fileDir)
-	info = strings.ReplaceAll(info, "@total@", cast.ToString(total))
-	info = strings.ReplaceAll(info, "@size@", cast.ToString(size))
-	path = dirtool.GetBasePath() + fileName + ".sh"
-	os.WriteFile(path, []byte(info), 0777)
-	return path
-}
+// 日志目录与轮转配置缓存：system.json 只需读一次，之后每个日志句柄复用
+var logDirOnce sync.Once
+var logDirCache string
+var logMaxSizeBytes int64
+var logMaxCount int
 
 // LogDir 日志文件夹
 func LogDir() string {
-	cfg := make(map[string]interface{})
-	jsontool.LoadFromFile(dirtool.GetBasePath()+"config"+string(os.PathSeparator)+"system.json", &cfg)
-	dirPath := cast.ToString(cfg["logdir"])
-	if dirPath == "" {
-		dirPath, _ = os.Getwd()
-		dirPath += string(os.PathSeparator) + "log" + string(os.PathSeparator)
-	}
-	dirtool.MustCreateDir(dirPath)
-	return dirPath
+	logDirOnce.Do(func() {
+		cfg := make(map[string]interface{})
+		jsontool.LoadFromFile(dirtool.GetBasePath()+"config"+string(os.PathSeparator)+"system.json", &cfg)
+		dirPath := cast.ToString(cfg["logdir"])
+		if dirPath == "" {
+			dirPath, _ = os.Getwd()
+			dirPath += string(os.PathSeparator) + "log" + string(os.PathSeparator)
+		}
+		logDirCache = dirPath
+
+		sizeMB := cast.ToInt64(cfg["logFileSize"])
+		if sizeMB <= 0 {
+			sizeMB = 500 // 默认 500MB
+		}
+		logMaxSizeBytes = sizeMB * 1024 * 1024
+		logMaxCount = cast.ToInt(cfg["logFileCount"])
+	})
+	dirtool.MustCreateDir(logDirCache)
+	return logDirCache
+}
+
+// logRotateConfig 返回单文件上限（字节）与备份保留份数
+func logRotateConfig() (int64, int) {
+	LogDir() // 确保配置已加载
+	return logMaxSizeBytes, logMaxCount
 }
 
 // LogPanic PANIC日志

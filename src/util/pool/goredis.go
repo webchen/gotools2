@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/webchen/gotools2/src/base/conf"
@@ -21,7 +22,12 @@ var Ctx = context.Background()
 
 var redisClientList = make(map[string]*redis.Client)
 
+// redisClientList 读写锁：InitRedis 写、GetRedisClient 读
+var redisClientLock sync.RWMutex
+
 func InitRedis() error {
+	redisClientLock.Lock()
+	defer redisClientLock.Unlock()
 	/*
 		if base.IsBuild() {
 			return nil
@@ -68,9 +74,28 @@ func GetRedisClient(key string) *redis.Client {
 	if key == "" {
 		return nil
 	}
-	if v, ok := redisClientList[key]; ok {
+	if v, ok := getRedisClientLocked(key); ok {
 		return v
 	}
-	logs.Warning("redis client ["+key+"] 不存在", redisClientList, false)
+	logs.Warning("redis client ["+key+"] 不存在", redisClientSnapshot(), false)
 	panic("redis client [" + key + "] 不存在")
+}
+
+// getRedisClientLocked 读锁内取客户端，避免在持锁期间做日志输出
+func getRedisClientLocked(key string) (*redis.Client, bool) {
+	redisClientLock.RLock()
+	defer redisClientLock.RUnlock()
+	v, ok := redisClientList[key]
+	return v, ok
+}
+
+// redisClientSnapshot 读锁内做一份拷贝，供日志/诊断使用
+func redisClientSnapshot() map[string]*redis.Client {
+	redisClientLock.RLock()
+	defer redisClientLock.RUnlock()
+	m := make(map[string]*redis.Client, len(redisClientList))
+	for k, v := range redisClientList {
+		m[k] = v
+	}
+	return m
 }

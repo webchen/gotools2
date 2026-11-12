@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"sync"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -20,15 +21,29 @@ import (
 
 var mysqlList = make(map[string]*xorm.Engine)
 
-//var dbLog *log.Logger
+// mysqlList 读写锁：InitMysql 写、GetMysqlClient 读
+var mysqlListLock sync.RWMutex
+
+var dbLog *log.Logger
+var dbLogOnce sync.Once
+
+// sqlLog sql 日志句柄只创建一次，避免重复开文件与重复起轮转 goroutine
+func sqlLog() *log.Logger {
+	dbLogOnce.Do(func() {
+		dbLog = base.CreateLogFileAccess("sql")
+	})
+	return dbLog
+}
 
 func InitMysql() error {
+	mysqlListLock.Lock()
+	defer mysqlListLock.Unlock()
 	/*
 		if base.IsBuild() {
 			return nil
 		}
 	*/
-	dbLog := base.CreateLogFileAccess("sql")
+	dbLog := sqlLog()
 
 	list := conf.GetConfig("mysql", nil).(map[string]interface{})
 	if len(list) == 0 {
@@ -74,9 +89,28 @@ func GetMysqlClient(key string) *xorm.Engine {
 	if key == "" {
 		return nil
 	}
-	if v, ok := mysqlList[key]; ok {
+	if v, ok := getMysqlClientLocked(key); ok {
 		return v
 	}
-	logs.Warning("mysql client ["+key+"] 不存在", mysqlList, false)
+	logs.Warning("mysql client ["+key+"] 不存在", mysqlClientSnapshot(), false)
 	panic("mysql client [" + key + "] 不存在")
+}
+
+// getMysqlClientLocked 读锁内取引擎
+func getMysqlClientLocked(key string) (*xorm.Engine, bool) {
+	mysqlListLock.RLock()
+	defer mysqlListLock.RUnlock()
+	v, ok := mysqlList[key]
+	return v, ok
+}
+
+// mysqlClientSnapshot 读锁内做一份拷贝，供日志/诊断使用
+func mysqlClientSnapshot() map[string]*xorm.Engine {
+	mysqlListLock.RLock()
+	defer mysqlListLock.RUnlock()
+	m := make(map[string]*xorm.Engine, len(mysqlList))
+	for k, v := range mysqlList {
+		m[k] = v
+	}
+	return m
 }

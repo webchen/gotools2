@@ -60,7 +60,7 @@ func (queue *Queue) Clear2List() (list []interface{}) {
 	queue.mutex.Lock()
 	defer queue.mutex.Unlock()
 	for element := queue.list.Front(); element != nil; {
-		list = append(list, element)
+		list = append(list, element.Value)
 		elementNext := element.Next()
 		queue.list.Remove(element)
 		element = elementNext
@@ -70,11 +70,15 @@ func (queue *Queue) Clear2List() (list []interface{}) {
 
 // Len 队列长度
 func (queue *Queue) Len() int {
+	queue.mutex.Lock()
+	defer queue.mutex.Unlock()
 	return queue.list.Len()
 }
 
 // Show 遍历打印数据
 func (queue *Queue) Show() {
+	queue.mutex.Lock()
+	defer queue.mutex.Unlock()
 	for item := queue.list.Front(); item != nil; item = item.Next() {
 		fmt.Printf("%+v", item.Value)
 	}

@@ -3,6 +3,7 @@ package conf
 import (
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/spf13/cast"
@@ -27,6 +28,12 @@ var baseConfigData map[string]map[string]any
 var loadTime time.Time = time.Now()
 
 var configLock sync.RWMutex
+
+// 配置读缓存：key -> 解析结果，受 configLock 保护，initLocal 重建配置时整体失效
+var configCache = make(map[string]any)
+
+// 配置版本号：initLocal 每次重建配置时自增，用于丢弃并发期间构建的旧缓存
+var configVersion atomic.Uint64
 
 func init() {
 	toInit()
@@ -70,6 +77,9 @@ func initLocal() {
 		}
 		return nil
 	})
+	// 配置已整体重建，读缓存全部失效
+	configCache = make(map[string]any)
+	configVersion.Add(1)
 	loadTime = time.Now()
 }
 
@@ -184,41 +194,54 @@ func initApollo() {
 }
 
 // GetConfig 获取JSON的配置，key支持"."操作，如：GetConfig("conf.runtime")，表示获取conf.json文件里面，runtime的值
+// 命中缓存直接返回；未命中才拆分 key 并逐层查询，结果非空则写回缓存（Reload 时缓存整体失效）
 func GetConfig(key string, def any) any {
 	configLock.RLock()
-	defer configLock.RUnlock()
+	if v, ok := configCache[key]; ok {
+		configLock.RUnlock()
+		return v
+	}
+	ver := configVersion.Load()
+	v, found := resolveConfigLocked(key)
+	configLock.RUnlock()
 
-	defer func() {
-		recover()
-	}()
+	if found {
+		// 写缓存要独占锁；若期间发生了 Reload，本次结果作废，不写入
+		configLock.Lock()
+		if configVersion.Load() == ver {
+			configCache[key] = v
+		}
+		configLock.Unlock()
+		return v
+	}
+	return def
+}
+
+// resolveConfigLocked 在持有 configLock 的前提下逐层解析 key，缺失或类型不符返回 false
+func resolveConfigLocked(key string) (any, bool) {
 	arr := strings.Split(key, ".")
-	if len(arr) == 0 {
-		return def
+	if len(arr) == 0 || arr[0] == "" {
+		return nil, false
+	}
+	cur, ok := config[arr[0]]
+	if !ok || cur == nil {
+		return nil, false
 	}
 	if len(arr) == 1 {
-		if config[arr[0]] == nil {
-			return def
-		}
-		return config[arr[0]]
+		return cur, true
 	}
-	confDeep := config[arr[0]][arr[1]]
-	if len(arr) == 2 {
-		if confDeep == nil {
-			return def
+	var node any = cur
+	for _, part := range arr[1:] {
+		m, ok := node.(map[string]any)
+		if !ok {
+			return nil, false
 		}
-		return confDeep
-	}
-	for j := 2; j < len(arr); j++ {
-		c, _ := confDeep.(any)
-		if c == nil {
-			return def
-		}
-		confDeep = confDeep.(map[string]any)[arr[j]]
-		if confDeep == nil {
-			return def
+		node, ok = m[part]
+		if !ok || node == nil {
+			return nil, false
 		}
 	}
-	return confDeep
+	return node, true
 }
 
 func GetEnv(key, defaultValue string) string {

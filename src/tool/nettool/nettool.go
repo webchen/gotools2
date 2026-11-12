@@ -1,6 +1,8 @@
 package nettool
 
 import (
+	"strings"
+
 	"github.com/toolkits/net"
 )
 
@@ -17,11 +19,12 @@ func GetLocalIP() []string {
 
 // GetLocalIPStr 获取IP字符串
 func GetLocalIPStr() string {
-	str := ""
+	var sb strings.Builder
 	for _, v := range localIP {
-		str += v + "_"
+		sb.WriteString(v)
+		sb.WriteString("_")
 	}
-	return str
+	return sb.String()
 }
 
 // GetLocalFirstIPStr 获取第1个IP（一台机器可能有多个IP），主要用于记录日志时的服务器IP
